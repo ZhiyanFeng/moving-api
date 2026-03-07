@@ -1,6 +1,7 @@
 package com.lycheetech.movingapi.booking;
 
 import com.lycheetech.movingapi.bid.Bid;
+import com.lycheetech.movingapi.common.audit.BaseEntity;
 import com.lycheetech.movingapi.mover.Mover;
 import com.lycheetech.movingapi.rfq.Rfq;
 import com.lycheetech.movingapi.vehicle.Vehicle;
@@ -8,7 +9,6 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
@@ -18,7 +18,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Booking {
+public class Booking extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -51,13 +51,5 @@ public class Booking {
     private LocalDate completionDate;
 
     private String notes;
-
-    @Column(name = "created_at", nullable = false, updatable = false)
-    private LocalDateTime createdAt;
-
-    @PrePersist
-    protected void onCreate() {
-        createdAt = LocalDateTime.now();
-    }
 }
 

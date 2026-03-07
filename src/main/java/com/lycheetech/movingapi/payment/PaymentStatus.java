@@ -1,5 +1,6 @@
 package com.lycheetech.movingapi.payment;
 
+import com.lycheetech.movingapi.common.audit.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -12,7 +13,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class PaymentStatus {
+public class PaymentStatus extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)

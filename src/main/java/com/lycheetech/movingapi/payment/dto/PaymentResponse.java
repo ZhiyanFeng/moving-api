@@ -16,6 +16,6 @@ public class PaymentResponse {
     private BigDecimal amount;
     private String paymentType;
     private String transactionId;
-    private LocalDateTime paymentDate;
+    private LocalDateTime paymentDate; // maps to BaseEntity.createdAt
 }
 

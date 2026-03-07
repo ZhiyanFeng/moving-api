@@ -1,13 +1,13 @@
 package com.lycheetech.movingapi.invoice;
 
 import com.lycheetech.movingapi.booking.Booking;
+import com.lycheetech.movingapi.common.audit.BaseEntity;
 import com.lycheetech.movingapi.payment.Payment;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
@@ -17,7 +17,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Invoice {
+public class Invoice extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -43,13 +43,5 @@ public class Invoice {
 
     @Column(name = "due_date", nullable = false)
     private LocalDate dueDate;
-
-    @Column(name = "created_at", nullable = false, updatable = false)
-    private LocalDateTime createdAt;
-
-    @PrePersist
-    protected void onCreate() {
-        createdAt = LocalDateTime.now();
-    }
 }
 

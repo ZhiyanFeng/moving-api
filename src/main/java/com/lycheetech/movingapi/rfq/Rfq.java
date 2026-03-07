@@ -1,12 +1,12 @@
 package com.lycheetech.movingapi.rfq;
 
+import com.lycheetech.movingapi.common.audit.BaseEntity;
 import com.lycheetech.movingapi.lookup.businessservice.BusinessService;
 import com.lycheetech.movingapi.user.User;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
@@ -16,7 +16,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Rfq {
+public class Rfq extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -47,13 +47,5 @@ public class Rfq {
 
     @Column(name = "item_details")
     private String itemDetails;
-
-    @Column(name = "created_at", nullable = false, updatable = false)
-    private LocalDateTime createdAt;
-
-    @PrePersist
-    protected void onCreate() {
-        createdAt = LocalDateTime.now();
-    }
 }
 

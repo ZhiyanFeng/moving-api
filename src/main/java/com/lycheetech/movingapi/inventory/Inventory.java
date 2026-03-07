@@ -1,6 +1,7 @@
 package com.lycheetech.movingapi.inventory;
 
 import com.lycheetech.movingapi.booking.Booking;
+import com.lycheetech.movingapi.common.audit.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -13,7 +14,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Inventory {
+public class Inventory extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)

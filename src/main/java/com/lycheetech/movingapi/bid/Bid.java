@@ -1,12 +1,12 @@
 package com.lycheetech.movingapi.bid;
 
+import com.lycheetech.movingapi.common.audit.BaseEntity;
 import com.lycheetech.movingapi.mover.Mover;
 import com.lycheetech.movingapi.rfq.Rfq;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
@@ -16,7 +16,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Bid {
+public class Bid extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -38,13 +38,5 @@ public class Bid {
     private BigDecimal amount;
 
     private String details;
-
-    @Column(name = "created_at", nullable = false, updatable = false)
-    private LocalDateTime createdAt;
-
-    @PrePersist
-    protected void onCreate() {
-        createdAt = LocalDateTime.now();
-    }
 }
 

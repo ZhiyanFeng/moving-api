@@ -1,11 +1,11 @@
 package com.lycheetech.movingapi.vehicle;
 
+import com.lycheetech.movingapi.common.audit.BaseEntity;
 import com.lycheetech.movingapi.mover.Mover;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
@@ -15,7 +15,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Vehicle {
+public class Vehicle extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -43,13 +43,5 @@ public class Vehicle {
 
     @Column(nullable = false, precision = 10, scale = 2)
     private BigDecimal capacity;
-
-    @Column(name = "created_at", nullable = false, updatable = false)
-    private LocalDateTime createdAt;
-
-    @PrePersist
-    protected void onCreate() {
-        createdAt = LocalDateTime.now();
-    }
 }
 

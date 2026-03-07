@@ -1,11 +1,11 @@
 package com.lycheetech.movingapi.mover;
 
+import com.lycheetech.movingapi.common.audit.BaseEntity;
 import com.lycheetech.movingapi.lookup.region.Region;
 import com.lycheetech.movingapi.lookup.businessservice.BusinessService;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
@@ -17,7 +17,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Mover {
+public class Mover extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -61,13 +61,5 @@ public class Mover {
     )
     @Builder.Default
     private Set<BusinessService> services = new HashSet<>();
-
-    @Column(name = "created_at", nullable = false, updatable = false)
-    private LocalDateTime createdAt;
-
-    @PrePersist
-    protected void onCreate() {
-        createdAt = LocalDateTime.now();
-    }
 }
 

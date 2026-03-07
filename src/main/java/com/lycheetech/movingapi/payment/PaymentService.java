@@ -70,7 +70,7 @@ public class PaymentService {
                 .amount(p.getAmount())
                 .paymentType(p.getPaymentType())
                 .transactionId(p.getTransactionId())
-                .paymentDate(p.getPaymentDate())
+                .paymentDate(p.getCreatedAt())
                 .build();
     }
 }

@@ -1,7 +1,7 @@
 package com.lycheetech.movingapi.rfq;
 
 import com.lycheetech.movingapi.common.audit.BaseEntity;
-import com.lycheetech.movingapi.lookup.businessservice.BusinessService;
+import com.lycheetech.movingapi.lookup.movingservice.MovingService;
 import com.lycheetech.movingapi.user.User;
 import jakarta.persistence.*;
 import lombok.*;
@@ -28,7 +28,7 @@ public class Rfq extends BaseEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "service_id")
-    private BusinessService service;
+    private MovingService service;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "status_id", nullable = false)

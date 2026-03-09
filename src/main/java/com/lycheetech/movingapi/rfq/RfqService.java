@@ -1,7 +1,7 @@
 package com.lycheetech.movingapi.rfq;
 
 import com.lycheetech.movingapi.common.exception.ResourceNotFoundException;
-import com.lycheetech.movingapi.lookup.businessservice.BusinessServiceRepository;
+import com.lycheetech.movingapi.lookup.movingservice.MovingServiceRepository;
 import com.lycheetech.movingapi.rfq.dto.RfqRequest;
 import com.lycheetech.movingapi.rfq.dto.RfqResponse;
 import com.lycheetech.movingapi.user.UserRepository;
@@ -18,7 +18,7 @@ public class RfqService {
     private final RfqRepository rfqRepository;
     private final RfqStatusRepository rfqStatusRepository;
     private final UserRepository userRepository;
-    private final BusinessServiceRepository businessServiceRepository;
+    private final MovingServiceRepository movingServiceRepository;
 
     public List<RfqResponse> findAll() {
         return rfqRepository.findAll().stream().map(this::toResponse).toList();
@@ -38,7 +38,7 @@ public class RfqService {
         var status = rfqStatusRepository.findById(request.getStatusId())
                 .orElseThrow(() -> new ResourceNotFoundException("RFQ status not found: " + request.getStatusId()));
         var service = request.getServiceId() != null
-                ? businessServiceRepository.findById(request.getServiceId()).orElse(null)
+                ? movingServiceRepository.findById(request.getServiceId()).orElse(null)
                 : null;
 
         Rfq rfq = Rfq.builder()
@@ -59,7 +59,7 @@ public class RfqService {
         var status = rfqStatusRepository.findById(request.getStatusId())
                 .orElseThrow(() -> new ResourceNotFoundException("RFQ status not found: " + request.getStatusId()));
         var service = request.getServiceId() != null
-                ? businessServiceRepository.findById(request.getServiceId()).orElse(null)
+                ? movingServiceRepository.findById(request.getServiceId()).orElse(null)
                 : null;
         rfq.setService(service);
         rfq.setStatus(status);

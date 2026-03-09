@@ -2,7 +2,7 @@ package com.lycheetech.movingapi.mover;
 
 import com.lycheetech.movingapi.common.audit.BaseEntity;
 import com.lycheetech.movingapi.lookup.region.Region;
-import com.lycheetech.movingapi.lookup.businessservice.BusinessService;
+import com.lycheetech.movingapi.lookup.movingservice.MovingService;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -60,6 +60,6 @@ public class Mover extends BaseEntity {
             inverseJoinColumns = @JoinColumn(name = "service_id")
     )
     @Builder.Default
-    private Set<BusinessService> services = new HashSet<>();
+    private Set<MovingService> services = new HashSet<>();
 }
 

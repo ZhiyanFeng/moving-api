@@ -1,9 +1,9 @@
-package com.lycheetech.movingapi.lookup.businessservice;
+package com.lycheetech.movingapi.lookup.movingservice;
 
 import com.lycheetech.movingapi.common.exception.BadRequestException;
 import com.lycheetech.movingapi.common.exception.ResourceNotFoundException;
-import com.lycheetech.movingapi.lookup.businessservice.dto.BusinessServiceRequest;
-import com.lycheetech.movingapi.lookup.businessservice.dto.BusinessServiceResponse;
+import com.lycheetech.movingapi.lookup.movingservice.dto.MovingServiceRequest;
+import com.lycheetech.movingapi.lookup.movingservice.dto.MovingServiceResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,26 +14,26 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
-public class BusinessServiceService {
+public class MovingServiceService {
 
-    private final BusinessServiceRepository repository;
+    private final MovingServiceRepository repository;
 
-    public List<BusinessServiceResponse> findAll() {
+    public List<MovingServiceResponse> findAll() {
         return repository.findAll().stream()
                 .map(this::toResponse)
                 .toList();
     }
 
-    public BusinessServiceResponse findById(UUID id) {
+    public MovingServiceResponse findById(UUID id) {
         return toResponse(getOrThrow(id));
     }
 
     @Transactional
-    public BusinessServiceResponse create(BusinessServiceRequest request) {
+    public MovingServiceResponse create(MovingServiceRequest request) {
         if (repository.existsByName(request.getName())) {
-            throw new BadRequestException("Business service already exists with name: " + request.getName());
+            throw new BadRequestException("Moving service already exists with name: " + request.getName());
         }
-        BusinessService entity = BusinessService.builder()
+        MovingService entity = MovingService.builder()
                 .name(request.getName())
                 .description(request.getDescription())
                 .build();
@@ -41,10 +41,10 @@ public class BusinessServiceService {
     }
 
     @Transactional
-    public BusinessServiceResponse update(UUID id, BusinessServiceRequest request) {
-        BusinessService entity = getOrThrow(id);
+    public MovingServiceResponse update(UUID id, MovingServiceRequest request) {
+        MovingService entity = getOrThrow(id);
         if (!entity.getName().equals(request.getName()) && repository.existsByName(request.getName())) {
-            throw new BadRequestException("Business service already exists with name: " + request.getName());
+            throw new BadRequestException("Moving service already exists with name: " + request.getName());
         }
         entity.setName(request.getName());
         entity.setDescription(request.getDescription());
@@ -56,13 +56,13 @@ public class BusinessServiceService {
         repository.delete(getOrThrow(id));
     }
 
-    private BusinessService getOrThrow(UUID id) {
+    private MovingService getOrThrow(UUID id) {
         return repository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Business service not found: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Moving service not found: " + id));
     }
 
-    private BusinessServiceResponse toResponse(BusinessService entity) {
-        return BusinessServiceResponse.builder()
+    private MovingServiceResponse toResponse(MovingService entity) {
+        return MovingServiceResponse.builder()
                 .id(entity.getId())
                 .name(entity.getName())
                 .description(entity.getDescription())

@@ -1,4 +1,4 @@
-package com.lycheetech.movingapi.lookup.businessservice;
+package com.lycheetech.movingapi.lookup.movingservice;
 
 import com.lycheetech.movingapi.common.audit.BaseEntity;
 import jakarta.persistence.*;
@@ -7,13 +7,13 @@ import lombok.*;
 import java.util.UUID;
 
 @Entity
-@Table(name = "business_services")
+@Table(name = "moving_services")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class BusinessService extends BaseEntity {
+public class MovingService extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)

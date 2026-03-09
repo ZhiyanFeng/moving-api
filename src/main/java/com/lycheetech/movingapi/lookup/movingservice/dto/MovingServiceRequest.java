@@ -1,11 +1,11 @@
-package com.lycheetech.movingapi.lookup.businessservice.dto;
+package com.lycheetech.movingapi.lookup.movingservice.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 
 @Data
-public class BusinessServiceRequest {
+public class MovingServiceRequest {
 
     @NotBlank(message = "Name is required")
     @Size(max = 100, message = "Name must not exceed 100 characters")

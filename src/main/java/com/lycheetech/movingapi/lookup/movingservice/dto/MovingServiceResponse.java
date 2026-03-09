@@ -1,4 +1,4 @@
-package com.lycheetech.movingapi.lookup.businessservice.dto;
+package com.lycheetech.movingapi.lookup.movingservice.dto;
 
 import lombok.Builder;
 import lombok.Data;
@@ -8,7 +8,7 @@ import java.util.UUID;
 
 @Data
 @Builder
-public class BusinessServiceResponse {
+public class MovingServiceResponse {
 
     private UUID id;
     private String name;

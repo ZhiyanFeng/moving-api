@@ -1,4 +1,4 @@
-package com.lycheetech.movingapi.lookup.businessservice;
+package com.lycheetech.movingapi.lookup.movingservice;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
@@ -7,9 +7,10 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Repository
-public interface BusinessServiceRepository extends JpaRepository<BusinessService, UUID> {
+public interface MovingServiceRepository extends JpaRepository<MovingService, UUID> {
 
     boolean existsByName(String name);
 
-    Optional<BusinessService> findByName(String name);
+    Optional<MovingService> findByName(String name);
 }
+

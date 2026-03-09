@@ -4,8 +4,8 @@ import com.lycheetech.movingapi.common.exception.BadRequestException;
 import com.lycheetech.movingapi.common.exception.ResourceNotFoundException;
 import com.lycheetech.movingapi.lookup.region.Region;
 import com.lycheetech.movingapi.lookup.region.RegionRepository;
-import com.lycheetech.movingapi.lookup.businessservice.BusinessService;
-import com.lycheetech.movingapi.lookup.businessservice.BusinessServiceRepository;
+import com.lycheetech.movingapi.lookup.movingservice.MovingService;
+import com.lycheetech.movingapi.lookup.movingservice.MovingServiceRepository;
 import com.lycheetech.movingapi.mover.dto.MoverRequest;
 import com.lycheetech.movingapi.mover.dto.MoverResponse;
 import lombok.RequiredArgsConstructor;
@@ -24,7 +24,7 @@ public class MoverService {
 
     private final MoverRepository moverRepository;
     private final RegionRepository regionRepository;
-    private final BusinessServiceRepository businessServiceRepository;
+    private final MovingServiceRepository movingServiceRepository;
 
     public List<MoverResponse> findAll() {
         return moverRepository.findAll().stream().map(this::toResponse).toList();
@@ -84,9 +84,9 @@ public class MoverService {
         return new HashSet<>(regionRepository.findAllById(ids));
     }
 
-    private Set<BusinessService> resolveServices(Set<UUID> ids) {
+    private Set<MovingService> resolveServices(Set<UUID> ids) {
         if (ids == null || ids.isEmpty()) return new HashSet<>();
-        return new HashSet<>(businessServiceRepository.findAllById(ids));
+        return new HashSet<>(movingServiceRepository.findAllById(ids));
     }
 
     private MoverResponse toResponse(Mover mover) {
@@ -102,7 +102,7 @@ public class MoverService {
                 .vehicleUrl(mover.getVehicleUrl())
                 .regions(mover.getRegions().stream().map(Region::getName).collect(Collectors.toSet()))
                 .services(mover.getServices().stream()
-                        .map(BusinessService::getName)
+                        .map(MovingService::getName)
                         .collect(Collectors.toSet()))
                 .createdAt(mover.getCreatedAt())
                 .build();

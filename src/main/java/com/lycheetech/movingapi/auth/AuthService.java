@@ -30,11 +30,16 @@ public class AuthService {
         if (userRepository.existsByEmail(request.getEmail())) {
             throw new BadRequestException("Email already registered: " + request.getEmail());
         }
+        if (userRepository.existsByFirebaseUid(request.getFirebaseUid())) {
+            throw new BadRequestException("Firebase UID already registered: " + request.getFirebaseUid());
+        }
         User user = User.builder()
-                .name(request.getName())
+                .firebaseUid(request.getFirebaseUid())
                 .email(request.getEmail())
+                .firstName(request.getFirstName())
+                .lastName(request.getLastName())
                 .phoneNumber(request.getPhoneNumber())
-                .address(request.getAddress())
+                .avatarUrl(request.getAvatarUrl())
                 .build();
         userRepository.save(user);
     }

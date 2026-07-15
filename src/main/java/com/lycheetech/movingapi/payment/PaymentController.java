@@ -19,9 +19,9 @@ public class PaymentController {
 
     private final PaymentService paymentService;
 
-    @GetMapping("/booking/{bookingId}")
-    public ResponseEntity<ApiResponse<List<PaymentResponse>>> getByBooking(@PathVariable UUID bookingId) {
-        return ResponseEntity.ok(ApiResponse.success(paymentService.findByBooking(bookingId)));
+    @GetMapping("/move/{moveId}")
+    public ResponseEntity<ApiResponse<List<PaymentResponse>>> getByMove(@PathVariable UUID moveId) {
+        return ResponseEntity.ok(ApiResponse.success(paymentService.findByMove(moveId)));
     }
 
     @GetMapping("/{id}")

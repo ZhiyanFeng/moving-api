@@ -1,6 +1,5 @@
 package com.lycheetech.movingapi.vehicle;
 
-import com.lycheetech.movingapi.common.audit.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -13,7 +12,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class VehicleStatus extends BaseEntity {
+public class VehicleStatus {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)

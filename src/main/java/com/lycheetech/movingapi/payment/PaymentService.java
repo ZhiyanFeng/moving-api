@@ -1,6 +1,6 @@
 package com.lycheetech.movingapi.payment;
 
-import com.lycheetech.movingapi.booking.BookingRepository;
+import com.lycheetech.movingapi.move.MoveRepository;
 import com.lycheetech.movingapi.common.exception.ResourceNotFoundException;
 import com.lycheetech.movingapi.payment.dto.PaymentRequest;
 import com.lycheetech.movingapi.payment.dto.PaymentResponse;
@@ -15,11 +15,10 @@ import java.util.UUID;
 public class PaymentService {
 
     private final PaymentRepository paymentRepository;
-    private final PaymentStatusRepository paymentStatusRepository;
-    private final BookingRepository bookingRepository;
+    private final MoveRepository moveRepository;
 
-    public List<PaymentResponse> findByBooking(UUID bookingId) {
-        return paymentRepository.findByBookingId(bookingId).stream().map(this::toResponse).toList();
+    public List<PaymentResponse> findByMove(UUID moveId) {
+        return paymentRepository.findByMoveId(moveId).stream().map(this::toResponse).toList();
     }
 
     public PaymentResponse findById(UUID id) {
@@ -27,29 +26,37 @@ public class PaymentService {
     }
 
     public PaymentResponse create(PaymentRequest request) {
-        var booking = bookingRepository.findById(request.getBookingId())
-                .orElseThrow(() -> new ResourceNotFoundException("Booking not found: " + request.getBookingId()));
-        var status = paymentStatusRepository.findById(request.getStatusId())
-                .orElseThrow(() -> new ResourceNotFoundException("Payment status not found: " + request.getStatusId()));
+        var move = moveRepository.findById(request.getMoveId())
+                .orElseThrow(() -> new ResourceNotFoundException("Move not found: " + request.getMoveId()));
 
         Payment payment = Payment.builder()
-                .booking(booking)
-                .status(status)
+                .move(move)
                 .amount(request.getAmount())
-                .paymentType(request.getPaymentType())
-                .transactionId(request.getTransactionId())
                 .build();
+        if (request.getStripeStatus() != null) {
+            payment.setStripeStatus(request.getStripeStatus());
+        }
+        if (request.getCurrency() != null) {
+            payment.setCurrency(request.getCurrency());
+        }
+        payment.setStripePaymentIntentId(request.getStripePaymentIntentId());
+        payment.setStripeInvoiceId(request.getStripeInvoiceId());
+        payment.setStripeReceiptUrl(request.getStripeReceiptUrl());
         return toResponse(paymentRepository.save(payment));
     }
 
     public PaymentResponse update(UUID id, PaymentRequest request) {
         Payment payment = getOrThrow(id);
-        var status = paymentStatusRepository.findById(request.getStatusId())
-                .orElseThrow(() -> new ResourceNotFoundException("Payment status not found: " + request.getStatusId()));
-        payment.setStatus(status);
+        if (request.getStripeStatus() != null) {
+            payment.setStripeStatus(request.getStripeStatus());
+        }
+        payment.setStripePaymentIntentId(request.getStripePaymentIntentId());
+        payment.setStripeInvoiceId(request.getStripeInvoiceId());
+        payment.setStripeReceiptUrl(request.getStripeReceiptUrl());
         payment.setAmount(request.getAmount());
-        payment.setPaymentType(request.getPaymentType());
-        payment.setTransactionId(request.getTransactionId());
+        if (request.getCurrency() != null) {
+            payment.setCurrency(request.getCurrency());
+        }
         return toResponse(paymentRepository.save(payment));
     }
 
@@ -65,12 +72,15 @@ public class PaymentService {
     private PaymentResponse toResponse(Payment p) {
         return PaymentResponse.builder()
                 .id(p.getId())
-                .bookingId(p.getBooking().getId())
-                .status(p.getStatus().getName())
+                .moveId(p.getMove().getId())
+                .stripeStatus(p.getStripeStatus())
+                .stripePaymentIntentId(p.getStripePaymentIntentId())
+                .stripeInvoiceId(p.getStripeInvoiceId())
+                .stripeReceiptUrl(p.getStripeReceiptUrl())
                 .amount(p.getAmount())
-                .paymentType(p.getPaymentType())
-                .transactionId(p.getTransactionId())
-                .paymentDate(p.getCreatedAt())
+                .currency(p.getCurrency())
+                .createdAt(p.getCreatedAt())
+                .updatedAt(p.getUpdatedAt())
                 .build();
     }
 }

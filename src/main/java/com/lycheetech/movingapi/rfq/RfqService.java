@@ -84,7 +84,7 @@ public class RfqService {
         return RfqResponse.builder()
                 .id(rfq.getId())
                 .userId(rfq.getUser().getId())
-                .userName(rfq.getUser().getName())
+                .userName(rfq.getUser().getFirstName() + " " + rfq.getUser().getLastName())
                 .serviceId(rfq.getService() != null ? rfq.getService().getId() : null)
                 .serviceName(rfq.getService() != null ? rfq.getService().getName() : null)
                 .status(rfq.getStatus().getName())

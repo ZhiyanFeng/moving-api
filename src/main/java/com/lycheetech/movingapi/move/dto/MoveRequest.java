@@ -1,25 +1,36 @@
-package com.lycheetech.movingapi.booking.dto;
+package com.lycheetech.movingapi.move.dto;
 
-import lombok.Builder;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Data
-@Builder
-public class BookingResponse {
-    private UUID id;
+public class MoveRequest {
+
+    @NotNull
     private UUID rfqId;
+
+    @NotNull
     private UUID moverId;
-    private String moverName;
+
+    @NotNull
+    private UUID customerId;
+
+    @NotNull
     private UUID bidId;
+
+    @NotNull
     private UUID vehicleId;
-    private String status;
+
+    @NotNull
+    private UUID statusId;
+
+    @NotNull
     private LocalDate startDate;
+
     private LocalDate completionDate;
     private String notes;
-    private LocalDateTime createdAt;
 }
 

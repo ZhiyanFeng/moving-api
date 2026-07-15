@@ -19,9 +19,9 @@ public class InventoryController {
 
     private final InventoryService inventoryService;
 
-    @GetMapping("/booking/{bookingId}")
-    public ResponseEntity<ApiResponse<List<InventoryResponse>>> getByBooking(@PathVariable UUID bookingId) {
-        return ResponseEntity.ok(ApiResponse.success(inventoryService.findByBooking(bookingId)));
+    @GetMapping("/move/{moveId}")
+    public ResponseEntity<ApiResponse<List<InventoryResponse>>> getByMove(@PathVariable UUID moveId) {
+        return ResponseEntity.ok(ApiResponse.success(inventoryService.findByMove(moveId)));
     }
 
     @GetMapping("/{id}")

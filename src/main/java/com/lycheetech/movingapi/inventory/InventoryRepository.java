@@ -8,6 +8,6 @@ import java.util.UUID;
 
 @Repository
 public interface InventoryRepository extends JpaRepository<Inventory, UUID> {
-    List<Inventory> findByBookingId(UUID bookingId);
+    List<Inventory> findByMoveId(UUID moveId);
 }
 

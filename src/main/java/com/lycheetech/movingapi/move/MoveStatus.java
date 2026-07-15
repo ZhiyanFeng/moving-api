@@ -1,6 +1,6 @@
-package com.lycheetech.movingapi.booking;
+package com.lycheetech.movingapi.move;
 
-import com.lycheetech.movingapi.common.audit.BaseEntity;
+import com.lycheetech.movingapi.common.audit.TimestampedEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -13,7 +13,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class BookingStatus extends BaseEntity {
+public class MoveStatus extends TimestampedEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)

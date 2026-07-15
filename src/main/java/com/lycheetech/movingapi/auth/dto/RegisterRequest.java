@@ -8,16 +8,21 @@ import lombok.Data;
 public class RegisterRequest {
 
     @NotBlank
-    private String name;
+    private String firebaseUid;
 
     @NotBlank
     @Email
     private String email;
 
     @NotBlank
-    private String password;
+    private String firstName;
 
+    @NotBlank
+    private String lastName;
+
+    @NotBlank
     private String phoneNumber;
-    private String address;
+
+    private String avatarUrl;
 }
 

@@ -1,7 +1,7 @@
 package com.lycheetech.movingapi.mover;
 
 import com.lycheetech.movingapi.common.audit.BaseEntity;
-import com.lycheetech.movingapi.lookup.region.Region;
+import com.lycheetech.movingapi.lookup.geo.SubArea;
 import com.lycheetech.movingapi.lookup.movingservice.MovingService;
 import jakarta.persistence.*;
 import lombok.*;
@@ -46,12 +46,12 @@ public class Mover extends BaseEntity {
 
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
-            name = "mover_regions",
+            name = "mover_service_areas",
             joinColumns = @JoinColumn(name = "mover_id"),
-            inverseJoinColumns = @JoinColumn(name = "region_id")
+            inverseJoinColumns = @JoinColumn(name = "sub_area_id")
     )
     @Builder.Default
-    private Set<Region> regions = new HashSet<>();
+    private Set<SubArea> serviceAreas = new HashSet<>();
 
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(

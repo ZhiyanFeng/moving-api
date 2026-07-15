@@ -28,21 +28,27 @@ public class UserService {
         if (userRepository.existsByEmail(request.getEmail())) {
             throw new BadRequestException("Email already in use: " + request.getEmail());
         }
+        if (userRepository.existsByFirebaseUid(request.getFirebaseUid())) {
+            throw new BadRequestException("Firebase UID already in use: " + request.getFirebaseUid());
+        }
         User user = User.builder()
-                .name(request.getName())
+                .firebaseUid(request.getFirebaseUid())
                 .email(request.getEmail())
+                .firstName(request.getFirstName())
+                .lastName(request.getLastName())
                 .phoneNumber(request.getPhoneNumber())
-                .address(request.getAddress())
+                .avatarUrl(request.getAvatarUrl())
                 .build();
         return toResponse(userRepository.save(user));
     }
 
     public UserResponse update(UUID id, UserRequest request) {
         User user = getOrThrow(id);
-        user.setName(request.getName());
         user.setEmail(request.getEmail());
+        user.setFirstName(request.getFirstName());
+        user.setLastName(request.getLastName());
         user.setPhoneNumber(request.getPhoneNumber());
-        user.setAddress(request.getAddress());
+        user.setAvatarUrl(request.getAvatarUrl());
         return toResponse(userRepository.save(user));
     }
 
@@ -58,10 +64,15 @@ public class UserService {
     private UserResponse toResponse(User user) {
         return UserResponse.builder()
                 .id(user.getId())
-                .name(user.getName())
+                .firebaseUid(user.getFirebaseUid())
                 .email(user.getEmail())
+                .firstName(user.getFirstName())
+                .lastName(user.getLastName())
                 .phoneNumber(user.getPhoneNumber())
-                .address(user.getAddress())
+                .avatarUrl(user.getAvatarUrl())
+                .ratingAvg(user.getRatingAvg())
+                .completedMoves(user.getCompletedMoves())
+                .canceledMoves(user.getCanceledMoves())
                 .createdAt(user.getCreatedAt())
                 .build();
     }

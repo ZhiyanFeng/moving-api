@@ -11,11 +11,14 @@ import java.util.UUID;
 @Builder
 public class PaymentResponse {
     private UUID id;
-    private UUID bookingId;
-    private String status;
+    private UUID moveId;
+    private String stripeStatus;
+    private String stripePaymentIntentId;
+    private String stripeInvoiceId;
+    private String stripeReceiptUrl;
     private BigDecimal amount;
-    private String paymentType;
-    private String transactionId;
-    private LocalDateTime paymentDate; // maps to BaseEntity.createdAt
+    private String currency;
+    private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
 }
 

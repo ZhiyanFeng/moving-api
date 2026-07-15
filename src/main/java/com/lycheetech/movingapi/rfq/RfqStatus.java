@@ -1,6 +1,5 @@
 package com.lycheetech.movingapi.rfq;
 
-import com.lycheetech.movingapi.common.audit.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -13,7 +12,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class RfqStatus extends BaseEntity {
+public class RfqStatus {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)

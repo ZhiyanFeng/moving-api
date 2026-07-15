@@ -42,21 +42,17 @@ movingapi/
 │   ├── BidService, BidController
 │   └── dto/  BidRequest, BidResponse
 │
-├── booking/                       ← bookings + booking_statuses
-│   ├── Booking, BookingStatus, BookingRepository, BookingStatusRepository
-│   ├── BookingService, BookingController
-│   └── dto/  BookingRequest, BookingResponse
+├── move/                          ← moves + booking_statuses
+│   ├── Move, MoveStatus, MoveRepository, MoveStatusRepository
+│   ├── MoveService, MoveController
+│   └── dto/  MoveRequest, MoveResponse
 │
-├── inventory/                     ← inventories table
-│   ├── Inventory, InventoryRepository, InventoryService, InventoryController
+├── inventory/                     ← move_inventories + inventory_items
+│   ├── Inventory, InventoryItem, InventoryRepository, InventoryItemRepository
+│   ├── InventoryService, InventoryController
 │   └── dto/  InventoryRequest, InventoryResponse
 │
-├── payment/                       ← payments + payment_statuses
-│   ├── Payment, PaymentStatus, PaymentRepository, PaymentStatusRepository
+├── payment/                       ← payments (Stripe-backed, no lookup table)
+│   ├── Payment, PaymentRepository
 │   ├── PaymentService, PaymentController
 │   └── dto/  PaymentRequest, PaymentResponse
-│
-└── invoice/                       ← invoices + invoice_statuses
-├── Invoice, InvoiceStatus, InvoiceRepository, InvoiceStatusRepository
-├── InvoiceService, InvoiceController
-└── dto/  InvoiceRequest, InvoiceResponse

@@ -1,6 +1,6 @@
 package com.lycheetech.movingapi.inventory;
 
-import com.lycheetech.movingapi.booking.BookingRepository;
+import com.lycheetech.movingapi.move.MoveRepository;
 import com.lycheetech.movingapi.common.exception.ResourceNotFoundException;
 import com.lycheetech.movingapi.inventory.dto.InventoryRequest;
 import com.lycheetech.movingapi.inventory.dto.InventoryResponse;
@@ -15,10 +15,11 @@ import java.util.UUID;
 public class InventoryService {
 
     private final InventoryRepository inventoryRepository;
-    private final BookingRepository bookingRepository;
+    private final MoveRepository moveRepository;
+    private final InventoryItemRepository inventoryItemRepository;
 
-    public List<InventoryResponse> findByBooking(UUID bookingId) {
-        return inventoryRepository.findByBookingId(bookingId).stream().map(this::toResponse).toList();
+    public List<InventoryResponse> findByMove(UUID moveId) {
+        return inventoryRepository.findByMoveId(moveId).stream().map(this::toResponse).toList();
     }
 
     public InventoryResponse findById(UUID id) {
@@ -26,22 +27,30 @@ public class InventoryService {
     }
 
     public InventoryResponse create(InventoryRequest request) {
-        var booking = bookingRepository.findById(request.getBookingId())
-                .orElseThrow(() -> new ResourceNotFoundException("Booking not found: " + request.getBookingId()));
+        var move = moveRepository.findById(request.getMoveId())
+                .orElseThrow(() -> new ResourceNotFoundException("Move not found: " + request.getMoveId()));
+        var item = inventoryItemRepository.findById(request.getItemId())
+                .orElseThrow(() -> new ResourceNotFoundException("Inventory item type not found: " + request.getItemId()));
         Inventory inventory = Inventory.builder()
-                .booking(booking)
-                .name(request.getName())
+                .move(move)
+                .item(item)
                 .quantity(request.getQuantity())
-                .description(request.getDescription())
+                .isFragile(request.getIsFragile())
+                .customerNotes(request.getCustomerNotes())
                 .build();
         return toResponse(inventoryRepository.save(inventory));
     }
 
     public InventoryResponse update(UUID id, InventoryRequest request) {
         Inventory inventory = getOrThrow(id);
-        inventory.setName(request.getName());
+        if (request.getItemId() != null && !request.getItemId().equals(inventory.getItem().getId())) {
+            var item = inventoryItemRepository.findById(request.getItemId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Inventory item type not found: " + request.getItemId()));
+            inventory.setItem(item);
+        }
         inventory.setQuantity(request.getQuantity());
-        inventory.setDescription(request.getDescription());
+        inventory.setIsFragile(request.getIsFragile());
+        inventory.setCustomerNotes(request.getCustomerNotes());
         return toResponse(inventoryRepository.save(inventory));
     }
 
@@ -57,10 +66,13 @@ public class InventoryService {
     private InventoryResponse toResponse(Inventory i) {
         return InventoryResponse.builder()
                 .id(i.getId())
-                .bookingId(i.getBooking().getId())
-                .name(i.getName())
+                .moveId(i.getMove().getId())
+                .itemId(i.getItem().getId())
+                .itemName(i.getItem().getItemName())
                 .quantity(i.getQuantity())
-                .description(i.getDescription())
+                .isFragile(i.getIsFragile())
+                .customerNotes(i.getCustomerNotes())
+                .createdAt(i.getCreatedAt())
                 .build();
     }
 }

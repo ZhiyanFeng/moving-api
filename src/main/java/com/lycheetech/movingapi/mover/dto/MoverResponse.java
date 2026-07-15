@@ -19,7 +19,7 @@ public class MoverResponse {
     private String description;
     private String avatarUrl;
     private String vehicleUrl;
-    private Set<String> regions;
+    private Set<String> serviceAreas;
     private Set<String> services;
     private LocalDateTime createdAt;
 }

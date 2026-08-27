@@ -65,8 +65,10 @@ CREATE TABLE sub_areas (
 );
 CREATE TABLE moving_services (
     id          UUID         PRIMARY KEY DEFAULT uuid_generate_v4(),
-    name        VARCHAR(100) NOT NULL UNIQUE,
+    code        VARCHAR(100) NOT NULL UNIQUE,
+    name        VARCHAR(100) NOT NULL,
     description TEXT,
+    is_active   BOOLEAN      NOT NULL DEFAULT TRUE,
     created_at  TIMESTAMPTZ  NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at  TIMESTAMPTZ  NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
@@ -112,6 +114,8 @@ CREATE TABLE users (
 
 -- Index for searching users
 CREATE INDEX idx_users_firebase_uid ON users(firebase_uid);
+
+
 CREATE TABLE movers (
     id           UUID         PRIMARY KEY DEFAULT uuid_generate_v4(),
     name         VARCHAR(255) NOT NULL,

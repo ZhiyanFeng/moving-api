@@ -31,3 +31,9 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### Firebase ###
+google-service-account.json
+src/main/resources/google-service-account.json
+.env
+

@@ -20,8 +20,15 @@ public class MovingService extends TimestampedEntity {
     private UUID id;
 
     @Column(nullable = false, unique = true)
+    private String code;
+
+    @Column(nullable = false)
     private String name;
 
     private String description;
+
+    @Builder.Default
+    @Column(nullable = false)
+    private boolean isActive = true;
 }
 

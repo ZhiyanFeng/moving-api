@@ -19,7 +19,7 @@ public class MovingServiceService {
     private final MovingServiceRepository repository;
 
     public List<MovingServiceResponse> findAll() {
-        return repository.findAll().stream()
+        return repository.findAllByIsActiveTrue().stream()
                 .map(this::toResponse)
                 .toList();
     }
@@ -30,10 +30,11 @@ public class MovingServiceService {
 
     @Transactional
     public MovingServiceResponse create(MovingServiceRequest request) {
-        if (repository.existsByName(request.getName())) {
-            throw new BadRequestException("Moving service already exists with name: " + request.getName());
+        if (repository.existsByCode(request.getCode())) {
+            throw new BadRequestException("Moving service already exists with code: " + request.getCode());
         }
         MovingService entity = MovingService.builder()
+                .code(request.getCode())
                 .name(request.getName())
                 .description(request.getDescription())
                 .build();
@@ -43,9 +44,10 @@ public class MovingServiceService {
     @Transactional
     public MovingServiceResponse update(UUID id, MovingServiceRequest request) {
         MovingService entity = getOrThrow(id);
-        if (!entity.getName().equals(request.getName()) && repository.existsByName(request.getName())) {
-            throw new BadRequestException("Moving service already exists with name: " + request.getName());
+        if (!entity.getCode().equals(request.getCode()) && repository.existsByCode(request.getCode())) {
+            throw new BadRequestException("Moving service already exists with code: " + request.getCode());
         }
+        entity.setCode(request.getCode());
         entity.setName(request.getName());
         entity.setDescription(request.getDescription());
         return toResponse(repository.save(entity));
@@ -64,8 +66,10 @@ public class MovingServiceService {
     private MovingServiceResponse toResponse(MovingService entity) {
         return MovingServiceResponse.builder()
                 .id(entity.getId())
+                .code(entity.getCode())
                 .name(entity.getName())
                 .description(entity.getDescription())
+                .active(entity.isActive())
                 .build();
     }
 }

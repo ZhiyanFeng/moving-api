@@ -71,11 +71,14 @@ INSERT INTO sub_areas (metro_area_id, name, description) VALUES
     ((SELECT id FROM metro_areas WHERE name = 'GREATER_SEATTLE_AREA'), 'BELLEVUE',         'Bellevue suburb'),
     ((SELECT id FROM metro_areas WHERE name = 'GREATER_SEATTLE_AREA'), 'TACOMA',           'Tacoma suburb');
 
-INSERT INTO moving_services (name, description) VALUES
-    ('RESIDENTIAL_MOVING', 'Full-service residential moving'),
-    ('SMALL_MOVING',       'Small items and furniture moving'),
-    ('TRASH_GARBAGE',      'Trash and garbage removal'),
-    ('PICKUP_DROP-OFF',     'Quick pick-up and drop-off service');
+INSERT INTO moving_services (code, name, description, is_active) VALUES
+    ('RESIDENTIAL_MOVING', 'Residential Moving',       'Full-service residential moving', TRUE),
+    ('SMALL_MOVING',       'Small Moving',             'Small items and furniture moving', TRUE),
+    ('TRASH_GARBAGE',      'Trash & Garbage Removal',  'Trash and garbage removal', TRUE),
+    ('PICKUP_DROPOFF',     'Pickup & Drop-off',        'Quick pick-up and drop-off service', TRUE),
+    ('COMMERCIAL_MOVING',  'Commercial Moving',        'Office and commercial relocation services', TRUE),
+    ('STORAGE_SOLUTIONS',  'Storage Solutions',        'Short-term and long-term storage options', TRUE);
+
 
 INSERT INTO inventory_items (item_name, category, thumbnail_url, cubic_feet_volume, estimated_weight_lbs, is_active) VALUES
 -- Living Room & Entertainment

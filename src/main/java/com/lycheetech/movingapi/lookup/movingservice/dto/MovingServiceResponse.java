@@ -3,7 +3,6 @@ package com.lycheetech.movingapi.lookup.movingservice.dto;
 import lombok.Builder;
 import lombok.Data;
 
-import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Data
@@ -11,7 +10,9 @@ import java.util.UUID;
 public class MovingServiceResponse {
 
     private UUID id;
+    private String code;
     private String name;
     private String description;
+    private boolean active;
 }
 

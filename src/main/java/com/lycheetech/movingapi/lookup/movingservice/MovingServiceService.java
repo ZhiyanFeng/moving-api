@@ -9,7 +9,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -24,7 +23,7 @@ public class MovingServiceService {
                 .toList();
     }
 
-    public MovingServiceResponse findById(UUID id) {
+    public MovingServiceResponse findById(Long id) {
         return toResponse(getOrThrow(id));
     }
 
@@ -42,7 +41,7 @@ public class MovingServiceService {
     }
 
     @Transactional
-    public MovingServiceResponse update(UUID id, MovingServiceRequest request) {
+    public MovingServiceResponse update(Long id, MovingServiceRequest request) {
         MovingService entity = getOrThrow(id);
         if (!entity.getCode().equals(request.getCode()) && repository.existsByCode(request.getCode())) {
             throw new BadRequestException("Moving service already exists with code: " + request.getCode());
@@ -54,11 +53,11 @@ public class MovingServiceService {
     }
 
     @Transactional
-    public void delete(UUID id) {
+    public void delete(Long id) {
         repository.delete(getOrThrow(id));
     }
 
-    private MovingService getOrThrow(UUID id) {
+    private MovingService getOrThrow(Long id) {
         return repository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Moving service not found: " + id));
     }

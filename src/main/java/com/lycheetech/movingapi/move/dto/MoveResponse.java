@@ -3,7 +3,7 @@ package com.lycheetech.movingapi.move.dto;
 import lombok.Builder;
 import lombok.Data;
 
-import java.time.LocalDate;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
@@ -16,10 +16,14 @@ public class MoveResponse {
     private String moverName;
     private UUID customerId;
     private UUID bidId;
-    private UUID vehicleId;
     private String status;
-    private LocalDate startDate;
-    private LocalDate completionDate;
+    private UUID pickupAddressId;
+    private UUID dropoffAddressId;
+    private String finalPickupAddressText;
+    private String finalDropoffAddressText;
+    private Integer billedDistanceMeters;
+    private BigDecimal finalPrice;
+    private LocalDateTime scheduledDate;
     private String notes;
     private LocalDateTime createdAt;
 }

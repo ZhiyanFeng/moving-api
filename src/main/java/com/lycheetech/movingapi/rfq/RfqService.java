@@ -7,7 +7,9 @@ import com.lycheetech.movingapi.rfq.dto.RfqResponse;
 import com.lycheetech.movingapi.user.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -32,11 +34,14 @@ public class RfqService {
         return toResponse(getOrThrow(id));
     }
 
-    public RfqResponse create(RfqRequest request) {
-        var user = userRepository.findById(request.getUserId())
-                .orElseThrow(() -> new ResourceNotFoundException("User not found: " + request.getUserId()));
-        var status = rfqStatusRepository.findById(request.getStatusId())
-                .orElseThrow(() -> new ResourceNotFoundException("RFQ status not found: " + request.getStatusId()));
+    @Transactional
+    public RfqResponse create(String firebaseUid, RfqRequest request) {
+        var user = userRepository.findByFirebaseUid(firebaseUid)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found for firebase uid: " + firebaseUid));
+        // A brand-new RFQ is always OPEN - status is system-controlled, not
+        // client-supplied, so request.getStatusId() is ignored on create.
+        var status = rfqStatusRepository.findByName("OPEN")
+                .orElseThrow(() -> new ResourceNotFoundException("RFQ status not found: OPEN"));
         var service = request.getServiceId() != null
                 ? movingServiceRepository.findById(request.getServiceId()).orElse(null)
                 : null;
@@ -48,27 +53,38 @@ public class RfqService {
                 .originAddress(request.getOriginAddress())
                 .destinationAddress(request.getDestinationAddress())
                 .moveDate(request.getMoveDate())
-                .description(request.getDescription())
-                .itemDetails(request.getItemDetails())
+                .notes(request.getNotes())
                 .build();
-        return toResponse(rfqRepository.save(rfq));
+
+        Rfq savedRfq = rfqRepository.save(rfq);
+
+        return toResponse(savedRfq);
     }
 
+    @Transactional
     public RfqResponse update(UUID id, RfqRequest request) {
         Rfq rfq = getOrThrow(id);
-        var status = rfqStatusRepository.findById(request.getStatusId())
-                .orElseThrow(() -> new ResourceNotFoundException("RFQ status not found: " + request.getStatusId()));
+        // Status transitions (OPEN -> CLOSED/CANCELLED) are optional here;
+        // only change it if the caller explicitly sent a statusId.
+        if (request.getStatusId() != null) {
+            var status = rfqStatusRepository.findById(request.getStatusId())
+                    .orElseThrow(() -> new ResourceNotFoundException("RFQ status not found: " + request.getStatusId()));
+            rfq.setStatus(status);
+        }
         var service = request.getServiceId() != null
                 ? movingServiceRepository.findById(request.getServiceId()).orElse(null)
                 : null;
         rfq.setService(service);
-        rfq.setStatus(status);
         rfq.setOriginAddress(request.getOriginAddress());
         rfq.setDestinationAddress(request.getDestinationAddress());
         rfq.setMoveDate(request.getMoveDate());
-        rfq.setDescription(request.getDescription());
-        rfq.setItemDetails(request.getItemDetails());
-        return toResponse(rfqRepository.save(rfq));
+        rfq.setNotes(request.getNotes());
+        if (request.getSpecialtyItems() != null) {
+            rfq.setSpecialtyItems(request.getSpecialtyItems());
+        }
+        Rfq savedRfq = rfqRepository.save(rfq);
+
+        return toResponse(savedRfq);
     }
 
     public void delete(UUID id) {
@@ -91,10 +107,12 @@ public class RfqService {
                 .originAddress(rfq.getOriginAddress())
                 .destinationAddress(rfq.getDestinationAddress())
                 .moveDate(rfq.getMoveDate())
-                .description(rfq.getDescription())
-                .itemDetails(rfq.getItemDetails())
+                .notes(rfq.getNotes())
+                .specialtyItems(rfq.getSpecialtyItems())
                 .createdAt(rfq.getCreatedAt())
                 .build();
     }
 }
+
+
 

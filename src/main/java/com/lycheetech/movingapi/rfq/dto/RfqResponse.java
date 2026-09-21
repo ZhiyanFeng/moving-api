@@ -5,6 +5,7 @@ import lombok.Data;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 @Data
@@ -13,14 +14,14 @@ public class RfqResponse {
     private UUID id;
     private UUID userId;
     private String userName;
-    private UUID serviceId;
+    private Long serviceId;
     private String serviceName;
     private String status;
-    private String originAddress;
-    private String destinationAddress;
+    private RfqAddress originAddress;
+    private RfqAddress destinationAddress;
     private LocalDate moveDate;
-    private String description;
-    private String itemDetails;
+    private String notes;
+    private List<SpecialtyItem> specialtyItems;
     private LocalDateTime createdAt;
 }
 

@@ -27,11 +27,6 @@ movingapi/
 │   ├── Mover, MoverRepository, MoverService, MoverController
 │   └── dto/  MoverRequest, MoverResponse
 │
-├── vehicle/                       ← vehicles + vehicle_statuses
-│   ├── Vehicle, VehicleStatus, VehicleRepository, VehicleStatusRepository
-│   ├── VehicleService, VehicleController
-│   └── dto/  VehicleRequest, VehicleResponse
-│
 ├── rfq/                           ← rfqs + rfq_statuses
 │   ├── Rfq, RfqStatus, RfqRepository, RfqStatusRepository
 │   ├── RfqService, RfqController
@@ -46,11 +41,6 @@ movingapi/
 │   ├── Move, MoveStatus, MoveRepository, MoveStatusRepository
 │   ├── MoveService, MoveController
 │   └── dto/  MoveRequest, MoveResponse
-│
-├── inventory/                     ← move_inventories + inventory_items
-│   ├── Inventory, InventoryItem, InventoryRepository, InventoryItemRepository
-│   ├── InventoryService, InventoryController
-│   └── dto/  InventoryRequest, InventoryResponse
 │
 ├── payment/                       ← payments (Stripe-backed, no lookup table)
 │   ├── Payment, PaymentRepository

@@ -5,11 +5,10 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 @Repository
-public interface SubAreaRepository extends JpaRepository<SubArea, UUID> {
-    List<SubArea> findByMetroAreaId(UUID metroAreaId);
+public interface SubAreaRepository extends JpaRepository<SubArea, Long> {
+    List<SubArea> findByMetroAreaId(Long metroAreaId);
     Optional<SubArea> findByName(String name);
 }
 

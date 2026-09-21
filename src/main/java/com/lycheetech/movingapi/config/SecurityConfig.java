@@ -9,6 +9,8 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
@@ -29,6 +31,18 @@ public class SecurityConfig {
 
     private final FirebaseAuth firebaseAuth;
     private final RestAuthenticationEntryPoint restAuthenticationEntryPoint;
+
+    /**
+     * All real authentication is handled by FirebaseTokenAuthenticationFilter
+     * (Firebase ID tokens), not Spring Security's username/password machinery.
+     * Defining this empty UserDetailsService bean stops Spring Boot's
+     * UserDetailsServiceAutoConfiguration from generating and logging a
+     * random default-user password on every startup.
+     */
+    @Bean
+    public UserDetailsService userDetailsService() {
+        return new InMemoryUserDetailsManager();
+    }
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {

@@ -1,5 +1,6 @@
 package com.lycheetech.movingapi.rfq;
 
+import com.lycheetech.movingapi.auth.firebase.FirebaseUserPrincipal;
 import com.lycheetech.movingapi.common.response.ApiResponse;
 import com.lycheetech.movingapi.rfq.dto.RfqRequest;
 import com.lycheetech.movingapi.rfq.dto.RfqResponse;
@@ -7,6 +8,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -35,9 +37,10 @@ public class RfqController {
     }
 
     @PostMapping
-    public ResponseEntity<ApiResponse<RfqResponse>> create(@Valid @RequestBody RfqRequest request) {
+    public ResponseEntity<ApiResponse<RfqResponse>> create(@AuthenticationPrincipal FirebaseUserPrincipal principal,
+                                                            @Valid @RequestBody RfqRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(ApiResponse.success("RFQ created", rfqService.create(request)));
+                .body(ApiResponse.success("RFQ created", rfqService.create(principal.getUid(), request)));
     }
 
     @PutMapping("/{id}")

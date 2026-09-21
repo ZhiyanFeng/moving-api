@@ -5,11 +5,10 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 @Repository
-public interface SubdivisionRepository extends JpaRepository<Subdivision, UUID> {
-    List<Subdivision> findByCountryId(UUID countryId);
+public interface SubdivisionRepository extends JpaRepository<Subdivision, Long> {
+    List<Subdivision> findByCountryId(Long countryId);
     Optional<Subdivision> findByCode(String code);
 }
 

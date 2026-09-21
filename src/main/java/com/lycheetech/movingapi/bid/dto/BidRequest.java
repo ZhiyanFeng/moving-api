@@ -17,7 +17,7 @@ public class BidRequest {
     private UUID rfqId;
 
     @NotNull
-    private UUID statusId;
+    private Long statusId;
 
     @NotNull
     @Positive

@@ -7,8 +7,6 @@ import lombok.Data;
 @Data
 public class UserRequest {
 
-    @NotBlank
-    private String firebaseUid;
 
     @NotBlank
     @Email

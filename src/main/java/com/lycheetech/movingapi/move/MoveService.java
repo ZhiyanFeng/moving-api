@@ -1,5 +1,7 @@
 package com.lycheetech.movingapi.move;
 
+import com.lycheetech.movingapi.address.Address;
+import com.lycheetech.movingapi.address.AddressRepository;
 import com.lycheetech.movingapi.bid.BidRepository;
 import com.lycheetech.movingapi.common.exception.ResourceNotFoundException;
 import com.lycheetech.movingapi.move.dto.MoveRequest;
@@ -7,9 +9,9 @@ import com.lycheetech.movingapi.move.dto.MoveResponse;
 import com.lycheetech.movingapi.mover.MoverRepository;
 import com.lycheetech.movingapi.rfq.RfqRepository;
 import com.lycheetech.movingapi.user.UserRepository;
-import com.lycheetech.movingapi.vehicle.VehicleRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
@@ -24,7 +26,7 @@ public class MoveService {
     private final MoverRepository moverRepository;
     private final UserRepository userRepository;
     private final BidRepository bidRepository;
-    private final VehicleRepository vehicleRepository;
+    private final AddressRepository addressRepository;
 
     public List<MoveResponse> findAll() {
         return moveRepository.findAll().stream().map(this::toResponse).toList();
@@ -42,6 +44,7 @@ public class MoveService {
         return toResponse(getOrThrow(id));
     }
 
+    @Transactional
     public MoveResponse create(MoveRequest request) {
         var rfq = rfqRepository.findById(request.getRfqId())
                 .orElseThrow(() -> new ResourceNotFoundException("RFQ not found: " + request.getRfqId()));
@@ -51,23 +54,28 @@ public class MoveService {
                 .orElseThrow(() -> new ResourceNotFoundException("Customer not found: " + request.getCustomerId()));
         var bid = bidRepository.findById(request.getBidId())
                 .orElseThrow(() -> new ResourceNotFoundException("Bid not found: " + request.getBidId()));
-        var vehicle = vehicleRepository.findById(request.getVehicleId())
-                .orElseThrow(() -> new ResourceNotFoundException("Vehicle not found: " + request.getVehicleId()));
         var status = moveStatusRepository.findById(request.getStatusId())
                 .orElseThrow(() -> new ResourceNotFoundException("Move status not found: " + request.getStatusId()));
+        var pickupAddress = resolveAddress(request.getPickupAddressId());
+        var dropoffAddress = resolveAddress(request.getDropoffAddressId());
 
         Move move = Move.builder()
                 .rfq(rfq)
                 .mover(mover)
                 .customer(customer)
                 .bid(bid)
-                .vehicle(vehicle)
                 .status(status)
-                .startDate(request.getStartDate())
-                .completionDate(request.getCompletionDate())
+                .pickupAddress(pickupAddress)
+                .dropoffAddress(dropoffAddress)
+                .finalPickupAddressText(request.getFinalPickupAddressText())
+                .finalDropoffAddressText(request.getFinalDropoffAddressText())
+                .billedDistanceMeters(request.getBilledDistanceMeters())
+                .finalPrice(request.getFinalPrice())
+                .scheduledDate(request.getScheduledDate())
                 .notes(request.getNotes())
                 .build();
-        return toResponse(moveRepository.save(move));
+        Move savedMove = moveRepository.save(move);
+        return toResponse(savedMove);
     }
 
     public MoveResponse update(UUID id, MoveRequest request) {
@@ -75,8 +83,13 @@ public class MoveService {
         var status = moveStatusRepository.findById(request.getStatusId())
                 .orElseThrow(() -> new ResourceNotFoundException("Move status not found: " + request.getStatusId()));
         move.setStatus(status);
-        move.setStartDate(request.getStartDate());
-        move.setCompletionDate(request.getCompletionDate());
+        move.setPickupAddress(resolveAddress(request.getPickupAddressId()));
+        move.setDropoffAddress(resolveAddress(request.getDropoffAddressId()));
+        move.setFinalPickupAddressText(request.getFinalPickupAddressText());
+        move.setFinalDropoffAddressText(request.getFinalDropoffAddressText());
+        move.setBilledDistanceMeters(request.getBilledDistanceMeters());
+        move.setFinalPrice(request.getFinalPrice());
+        move.setScheduledDate(request.getScheduledDate());
         move.setNotes(request.getNotes());
         return toResponse(moveRepository.save(move));
     }
@@ -84,6 +97,15 @@ public class MoveService {
     public void delete(UUID id) {
         moveRepository.delete(getOrThrow(id));
     }
+
+    private Address resolveAddress(UUID addressId) {
+        if (addressId == null) {
+            return null;
+        }
+        return addressRepository.findById(addressId)
+                .orElseThrow(() -> new ResourceNotFoundException("Address not found: " + addressId));
+    }
+
 
     private Move getOrThrow(UUID id) {
         return moveRepository.findById(id)
@@ -98,10 +120,14 @@ public class MoveService {
                 .moverName(m.getMover().getName())
                 .customerId(m.getCustomer().getId())
                 .bidId(m.getBid().getId())
-                .vehicleId(m.getVehicle().getId())
                 .status(m.getStatus().getName())
-                .startDate(m.getStartDate())
-                .completionDate(m.getCompletionDate())
+                .pickupAddressId(m.getPickupAddress() != null ? m.getPickupAddress().getId() : null)
+                .dropoffAddressId(m.getDropoffAddress() != null ? m.getDropoffAddress().getId() : null)
+                .finalPickupAddressText(m.getFinalPickupAddressText())
+                .finalDropoffAddressText(m.getFinalDropoffAddressText())
+                .billedDistanceMeters(m.getBilledDistanceMeters())
+                .finalPrice(m.getFinalPrice())
+                .scheduledDate(m.getScheduledDate())
                 .notes(m.getNotes())
                 .createdAt(m.getCreatedAt())
                 .build();

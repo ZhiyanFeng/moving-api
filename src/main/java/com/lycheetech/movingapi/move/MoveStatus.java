@@ -4,8 +4,6 @@ import com.lycheetech.movingapi.common.audit.TimestampedEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.util.UUID;
-
 @Entity
 @Table(name = "booking_statuses")
 @Getter
@@ -16,8 +14,8 @@ import java.util.UUID;
 public class MoveStatus extends TimestampedEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     @Column(nullable = false, unique = true)
     private String name;

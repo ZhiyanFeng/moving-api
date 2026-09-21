@@ -4,8 +4,6 @@ import com.lycheetech.movingapi.common.audit.TimestampedEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.util.UUID;
-
 @Entity
 @Table(name = "countries")
 @Getter
@@ -16,8 +14,8 @@ import java.util.UUID;
 public class Country extends TimestampedEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     @Column(nullable = false, unique = true, length = 2)
     private String code;

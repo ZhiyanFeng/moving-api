@@ -4,8 +4,6 @@ import com.lycheetech.movingapi.common.audit.TimestampedEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.util.UUID;
-
 @Entity
 @Table(name = "sub_areas")
 @Getter
@@ -16,8 +14,8 @@ import java.util.UUID;
 public class SubArea extends TimestampedEntity {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "metro_area_id", nullable = false)

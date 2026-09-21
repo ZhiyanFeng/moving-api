@@ -10,7 +10,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/moving-services")
@@ -25,7 +24,7 @@ public class MovingServiceController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ApiResponse<MovingServiceResponse>> getById(@PathVariable UUID id) {
+    public ResponseEntity<ApiResponse<MovingServiceResponse>> getById(@PathVariable Long id) {
         return ResponseEntity.ok(ApiResponse.success(movingServiceService.findById(id)));
     }
 
@@ -38,13 +37,13 @@ public class MovingServiceController {
 
     @PutMapping("/{id}")
     public ResponseEntity<ApiResponse<MovingServiceResponse>> update(
-            @PathVariable UUID id,
+            @PathVariable Long id,
             @Valid @RequestBody MovingServiceRequest request) {
         return ResponseEntity.ok(ApiResponse.success("Moving service updated", movingServiceService.update(id, request)));
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<ApiResponse<Void>> delete(@PathVariable UUID id) {
+    public ResponseEntity<ApiResponse<Void>> delete(@PathVariable Long id) {
         movingServiceService.delete(id);
         return ResponseEntity.ok(ApiResponse.success(null));
     }

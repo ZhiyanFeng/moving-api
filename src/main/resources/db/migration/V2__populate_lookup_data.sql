@@ -2,10 +2,6 @@
 -- Seed: Lookup Data
 -- =============================================================
 
-INSERT INTO vehicle_statuses (name, description) VALUES
-    ('ACTIVE',      'Vehicle is available and in service'),
-    ('MAINTENANCE', 'Vehicle is temporarily out of service for maintenance'),
-    ('INACTIVE',    'Vehicle is decommissioned or not currently in use');
 
 INSERT INTO rfq_statuses (name, description) VALUES
     ('OPEN',      'The customer posted the request, and movers can see it and place bids'),
@@ -18,16 +14,16 @@ INSERT INTO bid_statuses (name, description) VALUES
     ('ACCEPTED', 'Bid has been accepted by the customer'),
     ('REJECTED', 'Bid was declined by the customer');
 
+
+-- =============================================================
+-- Geography: Countries -> Subdivisions -> Metro Areas -> Sub Areas
+-- =============================================================
 INSERT INTO booking_statuses (name) VALUES
     ('SCHEDULED'),
     ('IN_PROGRESS'),
     ('COMPLETED'),
     ('CANCELLED');
 
-
--- =============================================================
--- Geography: Countries -> Subdivisions -> Metro Areas -> Sub Areas
--- =============================================================
 INSERT INTO countries (code, name) VALUES
     ('CA', 'Canada'),
     ('US', 'United States');
@@ -71,6 +67,7 @@ INSERT INTO sub_areas (metro_area_id, name, description) VALUES
     ((SELECT id FROM metro_areas WHERE name = 'GREATER_SEATTLE_AREA'), 'BELLEVUE',         'Bellevue suburb'),
     ((SELECT id FROM metro_areas WHERE name = 'GREATER_SEATTLE_AREA'), 'TACOMA',           'Tacoma suburb');
 
+
 INSERT INTO moving_services (code, name, description, is_active) VALUES
     ('RESIDENTIAL_MOVING', 'Residential Moving',       'Full-service residential moving', TRUE),
     ('SMALL_MOVING',       'Small Moving',             'Small items and furniture moving', TRUE),
@@ -79,68 +76,28 @@ INSERT INTO moving_services (code, name, description, is_active) VALUES
     ('COMMERCIAL_MOVING',  'Commercial Moving',        'Office and commercial relocation services', TRUE),
     ('STORAGE_SOLUTIONS',  'Storage Solutions',        'Short-term and long-term storage options', TRUE);
 
+-- =============================================================
+-- Property Types: used to estimate truck size
+-- =============================================================
+INSERT INTO property_types (slug, display_name, "group", estimated_cubic_feet) VALUES
+    -- Apartment
+    ('studio-apartment',     'Studio Apartment',      'Apartment',  450),
+    ('1-bedroom-apartment',  '1 Bedroom Apartment',   'Apartment',  650),
+    ('2-bedroom-apartment',  '2 Bedroom Apartment',   'Apartment',  900),
+    ('3-bedroom-apartment',  '3 Bedroom Apartment',   'Apartment', 1100),
 
-INSERT INTO inventory_items (item_name, category, thumbnail_url, cubic_feet_volume, estimated_weight_lbs, is_active) VALUES
--- Living Room & Entertainment
-('Sofa (3-Seater)', 'Living Room', '/images/living-room/sofa-3-seater.webp', 50.00, 150, TRUE),
-('Bookcase (Tall)', 'Living Room', '/images/living-room/bookcase-tall.webp', 20.00, 80, TRUE),
-('Armchair', 'Living Room', '/images/living-room/armchair.webp', 20.00, 50, TRUE),
-('Coffee Table', 'Living Room', '/images/living-room/coffee-table.webp', 15.00, 40, TRUE),
-('TV Stand / Media Console', 'Living Room', '/images/living-room/tv-stand.webp', 25.00, 75, TRUE),
-('Rug (Large - 8x10)', 'Living Room', '/images/living-room/rug-large.webp', 5.00, 35, TRUE),
-('Side Table', 'Living Room', '/images/living-room/side-table.webp', 4.00, 15, TRUE),
-('Piano (Upright)', 'Living Room', '/images/living-room/piano-upright.webp', 70.00, 500, TRUE),
+    -- Basement
+    ('1-bedroom-basement',   '1 Bedroom Basement',    'Basement',   600),
+    ('2-bedroom-basement',   '2 Bedroom Basement',    'Basement',   800),
+    ('3-bedroom-basement',   '3 Bedroom Basement',    'Basement',  1000),
 
--- Bedroom & Closet
-('Mattress (Queen)', 'Bedroom', '/images/bedroom/mattress-queen.webp', 40.00, 70, TRUE),
-('Nightstand', 'Bedroom', '/images/bedroom/nightstand.webp', 6.00, 25, TRUE),
-('Dresser (6-Drawer)', 'Bedroom', '/images/bedroom/dresser-6-drawer.webp', 45.00, 130, TRUE),
-('Nightstand (Secondary)', 'Bedroom', '/images/bedroom/nightstand-secondary.webp', 6.00, 25, TRUE),
-('Bed Frame (Queen)', 'Bedroom', '/images/bedroom/bedframe-queen.webp', 20.00, 80, TRUE),
-('Wardrobe (Free-standing)', 'Bedroom', '/images/bedroom/wardrobe.webp', 55.00, 150, TRUE),
-('Mirror (Full-Length)', 'Bedroom', '/images/bedroom/mirror-full.webp', 4.00, 20, TRUE),
-('Bed Frame (Twin)', 'Bedroom', '/images/bedroom/bedframe-twin.webp', 10.00, 45, TRUE),
-('Bed Frame (Full / Double)', 'Bedroom', '/images/bedroom/bedframe-double.webp', 15.00, 65, TRUE),
-('Bed Frame (King)', 'Bedroom', '/images/bedroom/bedframe-king.webp', 30.00, 110, TRUE),
-('Mattress (Twin)', 'Bedroom', '/images/bedroom/mattress-twin.webp', 20.00, 45, TRUE),
-('Mattress (Full / Double)', 'Bedroom', '/images/bedroom/mattress-double.webp', 30.00, 60, TRUE),
-('Mattress (King)', 'Bedroom', '/images/bedroom/mattress-king.webp', 60.00, 100, TRUE),
+    -- House
+    ('2-bedroom-house',      '2 Bedroom House',       'House',     1000),
+    ('3-bedroom-house',      '3 Bedroom House',       'House',     1400),
+    ('4-bedroom-house',      '4 Bedroom House',       'House',     1800),
+    ('5-plus-bedroom-house', '5+ Bedroom House',      'House',     2400),
 
--- Kitchen & Dining
-('Dining Chair', 'Dining Room', '/images/dining/dining-chair.webp', 5.00, 15, TRUE),
-('Refrigerator', 'Kitchen', '/images/kitchen/refrigerator.webp', 60.00, 250, TRUE),
-('Dining Table', 'Dining Room', '/images/dining/dining-table.webp', 40.00, 120, TRUE),
-('China Cabinet', 'Dining Room', '/images/dining/china-cabinet.webp', 50.00, 200, TRUE),
-('Microwave Oven', 'Kitchen', '/images/kitchen/microwave.webp', 4.00, 30, TRUE),
-('Bar Stool', 'Kitchen', '/images/kitchen/bar-stool.webp', 8.00, 20, TRUE),
-('Kitchen Cart / Island', 'Kitchen', '/images/kitchen/kitchen-cart.webp', 20.00, 60, TRUE),
+    -- Townhouse
+    ('2-bedroom-townhouse',  '2 Bedroom Townhouse',   'Townhouse', 1100),
+    ('3-bedroom-townhouse',  '3 Bedroom Townhouse',   'Townhouse', 1300);
 
--- Boxes & Supplies
-('Box (Medium)', 'Boxes', '/images/boxes/box-medium.webp', 3.00, 40, TRUE),
-('Box (Large)', 'Boxes', '/images/boxes/box-large.webp', 4.50, 50, TRUE),
-('Box (Small)', 'Boxes', '/images/boxes/box-small.webp', 1.50, 30, TRUE),
-('Wardrobe Box', 'Boxes', '/images/boxes/box-wardrobe.webp', 15.00, 40, TRUE),
-
--- Office & Study
-('Desk (Large)', 'Office', '/images/office/desk-large.webp', 30.00, 90, TRUE),
-('Office Chair', 'Office', '/images/office/office-chair.webp', 10.00, 35, TRUE),
-('File Cabinet (2-Drawer)', 'Office', '/images/office/file-cabinet.webp', 10.00, 50, TRUE),
-('Computer Monitor', 'Office', '/images/office/monitor.webp', 3.00, 15, TRUE),
-('Printer / Scanner', 'Office', '/images/office/printer.webp', 5.00, 25, TRUE),
-
--- Electronics
-('Flat Screen TV (55")', 'Electronics', '/images/electronics/tv-55.webp', 8.00, 45, TRUE),
-
--- Garage, Outdoor & Fitness
-('Bicycle', 'Garage/Sports', '/images/garage/bicycle.webp', 15.00, 30, TRUE),
-('Patio Table', 'Outdoor', '/images/outdoor/patio-table.webp', 30.00, 50, TRUE),
-('Patio Chair', 'Outdoor', '/images/outdoor/patio-chair.webp', 10.00, 15, TRUE),
-('Lawn Mower (Push)', 'Garage', '/images/garage/lawn-mower.webp', 20.00, 70, TRUE),
-('Treadmill', 'Fitness', '/images/fitness/treadmill.webp', 60.00, 200, TRUE),
-('Dumbbell Set', 'Fitness', '/images/fitness/dumbbell-set.webp', 5.00, 100, TRUE),
-('Tool Chest', 'Garage', '/images/garage/tool-chest.webp', 15.00, 80, TRUE),
-
--- Laundry & Household
-('Washing Machine', 'Laundry', '/images/laundry/washing-machine.webp', 35.00, 180, TRUE),
-('Clothes Dryer', 'Laundry', '/images/laundry/clothes-dryer.webp', 35.00, 130, TRUE),
-('Vacuum Cleaner', 'Household', '/images/household/vacuum.webp', 7.00, 18, TRUE);

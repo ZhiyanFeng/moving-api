@@ -24,7 +24,7 @@ public class MoverRequest {
     private String description;
     private String avatarUrl;
     private String vehicleUrl;
-    private Set<UUID> subAreaIds;
-    private Set<UUID> serviceIds;
+    private Set<Long> subAreaIds;
+    private Set<Long> serviceIds;
 }
 

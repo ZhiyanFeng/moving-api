@@ -68,11 +68,11 @@ public class MoverService {
         return moverRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Mover not found: " + id));
     }
-    private Set<SubArea> resolveServiceAreas(Set<UUID> ids) {
+    private Set<SubArea> resolveServiceAreas(Set<Long> ids) {
         if (ids == null || ids.isEmpty()) return new HashSet<>();
         return new HashSet<>(subAreaRepository.findAllById(ids));
     }
-    private Set<MovingService> resolveServices(Set<UUID> ids) {
+    private Set<MovingService> resolveServices(Set<Long> ids) {
         if (ids == null || ids.isEmpty()) return new HashSet<>();
         return new HashSet<>(movingServiceRepository.findAllById(ids));
     }

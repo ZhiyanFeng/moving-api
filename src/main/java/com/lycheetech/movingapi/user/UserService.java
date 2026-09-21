@@ -24,15 +24,20 @@ public class UserService {
         return toResponse(getOrThrow(id));
     }
 
-    public UserResponse create(UserRequest request) {
+    public UserResponse findByFirebaseUid(String firebaseUid) {
+        return toResponse(userRepository.findByFirebaseUid(firebaseUid)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found for firebase uid: " + firebaseUid)));
+    }
+
+    public UserResponse create(String firebaseUid, UserRequest request) {
         if (userRepository.existsByEmail(request.getEmail())) {
             throw new BadRequestException("Email already in use: " + request.getEmail());
         }
-        if (userRepository.existsByFirebaseUid(request.getFirebaseUid())) {
-            throw new BadRequestException("Firebase UID already in use: " + request.getFirebaseUid());
+        if (userRepository.existsByFirebaseUid(firebaseUid)) {
+            throw new BadRequestException("Firebase UID already in use: " + firebaseUid);
         }
         User user = User.builder()
-                .firebaseUid(request.getFirebaseUid())
+                .firebaseUid(firebaseUid)
                 .email(request.getEmail())
                 .firstName(request.getFirstName())
                 .lastName(request.getLastName())

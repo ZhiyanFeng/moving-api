@@ -1,15 +1,16 @@
 package com.lycheetech.movingapi.move;
 
+import com.lycheetech.movingapi.address.Address;
 import com.lycheetech.movingapi.bid.Bid;
 import com.lycheetech.movingapi.common.audit.BaseEntity;
 import com.lycheetech.movingapi.mover.Mover;
 import com.lycheetech.movingapi.rfq.Rfq;
 import com.lycheetech.movingapi.user.User;
-import com.lycheetech.movingapi.vehicle.Vehicle;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.time.LocalDate;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Entity
@@ -41,19 +42,35 @@ public class Move extends BaseEntity {
     @JoinColumn(name = "bid_id", nullable = false)
     private Bid bid;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "vehicle_id", nullable = false)
-    private Vehicle vehicle;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "status_id", nullable = false)
     private MoveStatus status;
 
-    @Column(name = "start_date", nullable = false)
-    private LocalDate startDate;
+    // Operational Links (Points to the addresses table)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "pickup_address_id")
+    private Address pickupAddress;
 
-    @Column(name = "completion_date")
-    private LocalDate completionDate;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "dropoff_address_id")
+    private Address dropoffAddress;
+
+    // Historical Snapshots (Locked in at time of billing)
+    @Column(name = "final_pickup_address_text", nullable = false)
+    private String finalPickupAddressText;
+
+    @Column(name = "final_dropoff_address_text", nullable = false)
+    private String finalDropoffAddressText;
+
+    @Column(name = "billed_distance_meters")
+    private Integer billedDistanceMeters;
+
+    @Column(name = "final_price", precision = 10, scale = 2)
+    private BigDecimal finalPrice;
+
+    @Column(name = "scheduled_date", nullable = false)
+    private LocalDateTime scheduledDate;
 
     private String notes;
 }

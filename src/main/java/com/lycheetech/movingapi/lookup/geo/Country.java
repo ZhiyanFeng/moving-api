@@ -22,5 +22,11 @@ public class Country extends TimestampedEntity {
 
     @Column(nullable = false, unique = true)
     private String name;
+
+    // Deprecation flag: retire a region from active use without breaking
+    // historical FK references (e.g. addresses/mover_service_areas).
+    @Builder.Default
+    @Column(name = "is_active", nullable = false)
+    private boolean isActive = true;
 }
 

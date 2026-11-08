@@ -26,7 +26,8 @@ public class SecurityConfig {
             "/v3/api-docs/**",
             "/actuator/health",
             "/api/v1/moving-services/**",
-            "/api/v1/inventory-items/**"
+            "/api/v1/inventory-items/**",
+            "/api/v1/property-types/**"
     };
 
     private final FirebaseAuth firebaseAuth;

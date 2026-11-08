@@ -1,7 +1,9 @@
 package com.lycheetech.movingapi.rfq;
 
 import com.lycheetech.movingapi.common.exception.ResourceNotFoundException;
+import com.lycheetech.movingapi.common.geo.GeoDistanceUtil;
 import com.lycheetech.movingapi.lookup.movingservice.MovingServiceRepository;
+import com.lycheetech.movingapi.rfq.dto.RfqAddress;
 import com.lycheetech.movingapi.rfq.dto.RfqRequest;
 import com.lycheetech.movingapi.rfq.dto.RfqResponse;
 import com.lycheetech.movingapi.user.UserRepository;
@@ -9,7 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Collections;
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
 
@@ -21,6 +23,7 @@ public class RfqService {
     private final RfqStatusRepository rfqStatusRepository;
     private final UserRepository userRepository;
     private final MovingServiceRepository movingServiceRepository;
+    private final GeoDistanceUtil geoDistanceUtil;
 
     public List<RfqResponse> findAll() {
         return rfqRepository.findAll().stream().map(this::toResponse).toList();
@@ -28,6 +31,10 @@ public class RfqService {
 
     public List<RfqResponse> findByUser(UUID userId) {
         return rfqRepository.findByUserId(userId).stream().map(this::toResponse).toList();
+    }
+
+    public List<RfqResponse> findOpenByUser(UUID userId) {
+        return rfqRepository.findByUserIdAndStatusName(userId, "OPEN").stream().map(this::toResponse).toList();
     }
 
     public RfqResponse findById(UUID id) {
@@ -46,7 +53,7 @@ public class RfqService {
                 ? movingServiceRepository.findById(request.getServiceId()).orElse(null)
                 : null;
 
-        Rfq rfq = Rfq.builder()
+        Rfq.RfqBuilder rfqBuilder = Rfq.builder()
                 .user(user)
                 .service(service)
                 .status(status)
@@ -54,7 +61,11 @@ public class RfqService {
                 .destinationAddress(request.getDestinationAddress())
                 .moveDate(request.getMoveDate())
                 .notes(request.getNotes())
-                .build();
+                .estimatedDistanceKm(estimateDistanceKm(request.getOriginAddress(), request.getDestinationAddress()));
+        if (request.getSpecialtyItems() != null) {
+            rfqBuilder.specialtyItems(request.getSpecialtyItems());
+        }
+        Rfq rfq = rfqBuilder.build();
 
         Rfq savedRfq = rfqRepository.save(rfq);
 
@@ -79,6 +90,7 @@ public class RfqService {
         rfq.setDestinationAddress(request.getDestinationAddress());
         rfq.setMoveDate(request.getMoveDate());
         rfq.setNotes(request.getNotes());
+        rfq.setEstimatedDistanceKm(estimateDistanceKm(request.getOriginAddress(), request.getDestinationAddress()));
         if (request.getSpecialtyItems() != null) {
             rfq.setSpecialtyItems(request.getSpecialtyItems());
         }
@@ -96,6 +108,16 @@ public class RfqService {
                 .orElseThrow(() -> new ResourceNotFoundException("RFQ not found: " + id));
     }
 
+    private BigDecimal estimateDistanceKm(RfqAddress origin, RfqAddress destination) {
+        if (origin == null || destination == null) {
+            return null;
+        }
+        return geoDistanceUtil.getDistanceKm(
+                origin.getLatitude(), origin.getLongitude(),
+                destination.getLatitude(), destination.getLongitude()
+        ).orElse(null);
+    }
+
     private RfqResponse toResponse(Rfq rfq) {
         return RfqResponse.builder()
                 .id(rfq.getId())
@@ -109,6 +131,7 @@ public class RfqService {
                 .moveDate(rfq.getMoveDate())
                 .notes(rfq.getNotes())
                 .specialtyItems(rfq.getSpecialtyItems())
+                .estimatedDistanceKm(rfq.getEstimatedDistanceKm())
                 .createdAt(rfq.getCreatedAt())
                 .build();
     }

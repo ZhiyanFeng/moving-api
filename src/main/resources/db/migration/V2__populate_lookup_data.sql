@@ -10,9 +10,10 @@ INSERT INTO rfq_statuses (name, description) VALUES
     ('CANCELLED', 'Customer changed their mind before a bid was accepted. The RFQ is now locked and no further bids can be submitted');
 
 INSERT INTO bid_statuses (name, description) VALUES
-    ('PENDING',  'Bid has been submitted and is awaiting a decision'),
-    ('ACCEPTED', 'Bid has been accepted by the customer'),
-    ('REJECTED', 'Bid was declined by the customer');
+    ('PENDING',   'Bid has been submitted and is awaiting a decision'),
+    ('ACCEPTED',  'Bid has been accepted by the customer'),
+    ('REJECTED',  'Bid was declined by the customer'),
+    ('WITHDRAWN', 'Mover retracted the bid before it was accepted or rejected');
 
 
 -- =============================================================
@@ -79,25 +80,31 @@ INSERT INTO moving_services (code, name, description, is_active) VALUES
 -- =============================================================
 -- Property Types: used to estimate truck size
 -- =============================================================
-INSERT INTO property_types (slug, display_name, "group", estimated_cubic_feet) VALUES
-    -- Apartment
-    ('studio-apartment',     'Studio Apartment',      'Apartment',  450),
-    ('1-bedroom-apartment',  '1 Bedroom Apartment',   'Apartment',  650),
-    ('2-bedroom-apartment',  '2 Bedroom Apartment',   'Apartment',  900),
-    ('3-bedroom-apartment',  '3 Bedroom Apartment',   'Apartment', 1100),
+INSERT INTO property_types (slug, display_name, category, section_name, room_count, is_basement, estimated_cubic_feet, display_order) VALUES
+    -- =================================================================
+    -- CATEGORY 1: House (Contains "Full House" and "Basement Suite")
+    -- =================================================================
+    ('2-bed-house',     '2 Bedroom', 'House', 'Full House',     2, false, 1100, 10),
+    ('3-bed-house',     '3 Bedroom', 'House', 'Full House',     3, false, 1500, 20),
+    ('4-bed-house',     '4 Bedroom', 'House', 'Full House',     4, false, 2000, 30),
+    ('5-bed-house',     '5+ Bedroom','House', 'Full House',     5, false, 2600, 40),
 
-    -- Basement
-    ('1-bedroom-basement',   '1 Bedroom Basement',    'Basement',   600),
-    ('2-bedroom-basement',   '2 Bedroom Basement',    'Basement',   800),
-    ('3-bedroom-basement',   '3 Bedroom Basement',    'Basement',  1000),
+    ('1-bed-basement',  '1 Bed',     'House', 'Basement Suite', 1, true,  550,  50),
+    ('2-bed-basement',  '2 Bed',     'House', 'Basement Suite', 2, true,  800,  60),
+    ('3-bed-basement',  '3 Bed',     'House', 'Basement Suite', 3, true,  1100, 70),
 
-    -- House
-    ('2-bedroom-house',      '2 Bedroom House',       'House',     1000),
-    ('3-bedroom-house',      '3 Bedroom House',       'House',     1400),
-    ('4-bedroom-house',      '4 Bedroom House',       'House',     1800),
-    ('5-plus-bedroom-house', '5+ Bedroom House',      'House',     2400),
+    -- =================================================================
+    -- CATEGORY 2: Townhouse (Dedicated Top Tab)
+    -- =================================================================
+    ('2-bed-townhouse', '2 Bedroom', 'Townhouse', 'Townhouse',  2, false, 950,  10),
+    ('3-bed-townhouse', '3 Bedroom', 'Townhouse', 'Townhouse',  3, false, 1250, 20),
+    ('4-bed-townhouse', '4 Bedroom', 'Townhouse', 'Townhouse',  4, false, 1600, 30),
 
-    -- Townhouse
-    ('2-bedroom-townhouse',  '2 Bedroom Townhouse',   'Townhouse', 1100),
-    ('3-bedroom-townhouse',  '3 Bedroom Townhouse',   'Townhouse', 1300);
+    -- =================================================================
+    -- CATEGORY 3: Apartment / Condo
+    -- =================================================================
+    ('studio-apt',      'Studio',    'Apartment', 'Apartment',  0, false, 400,  10),
+    ('1-bed-apt',       '1 Bedroom', 'Apartment', 'Apartment',  1, false, 600,  20),
+    ('2-bed-apt',       '2 Bedroom', 'Apartment', 'Apartment',  2, false, 900,  30),
+    ('3-bed-apt',       '3 Bedroom', 'Apartment', 'Apartment',  3, false, 1200, 40);
 

@@ -27,6 +27,7 @@ public class BidController {
     @GetMapping("/rfq/{rfqId}")
     public ResponseEntity<ApiResponse<List<BidResponse>>> getByRfq(@PathVariable UUID rfqId) {
         return ResponseEntity.ok(ApiResponse.success(bidService.findByRfq(rfqId)));
+
     }
 
     @GetMapping("/mover/{moverId}")

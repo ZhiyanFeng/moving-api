@@ -10,5 +10,6 @@ import java.util.UUID;
 public interface RfqRepository extends JpaRepository<Rfq, UUID> {
     List<Rfq> findByUserId(UUID userId);
     List<Rfq> findByStatusName(String statusName);
+    List<Rfq> findByUserIdAndStatusName(UUID userId, String statusName);
 }
 

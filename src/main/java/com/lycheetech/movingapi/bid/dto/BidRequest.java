@@ -1,5 +1,7 @@
 package com.lycheetech.movingapi.bid.dto;
 
+import com.lycheetech.movingapi.bid.PricingType;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import lombok.Data;
@@ -20,8 +22,14 @@ public class BidRequest {
     private Long statusId;
 
     @NotNull
+    private PricingType pricingType;
+
+    @NotNull
     @Positive
-    private BigDecimal amount;
+    private BigDecimal price;
+
+    @Min(0)
+    private Integer minHours;
 
     private String details;
 }

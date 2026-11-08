@@ -26,5 +26,9 @@ public class Subdivision extends TimestampedEntity {
 
     @Column(nullable = false)
     private String name;
+
+    @Builder.Default
+    @Column(name = "is_active", nullable = false)
+    private boolean isActive = true;
 }
 

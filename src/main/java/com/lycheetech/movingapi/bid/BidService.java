@@ -2,6 +2,7 @@ package com.lycheetech.movingapi.bid;
 
 import com.lycheetech.movingapi.bid.dto.BidRequest;
 import com.lycheetech.movingapi.bid.dto.BidResponse;
+import com.lycheetech.movingapi.common.exception.BadRequestException;
 import com.lycheetech.movingapi.common.exception.ResourceNotFoundException;
 import com.lycheetech.movingapi.mover.MoverRepository;
 import com.lycheetech.movingapi.rfq.RfqRepository;
@@ -44,11 +45,15 @@ public class BidService {
         var status = bidStatusRepository.findById(request.getStatusId())
                 .orElseThrow(() -> new ResourceNotFoundException("Bid status not found: " + request.getStatusId()));
 
+        Integer minHours = normalizeMinHours(request.getPricingType(), request.getMinHours());
+
         Bid bid = Bid.builder()
                 .mover(mover)
                 .rfq(rfq)
                 .status(status)
-                .amount(request.getAmount())
+                .pricingType(request.getPricingType())
+                .price(request.getPrice())
+                .minHours(minHours)
                 .details(request.getDetails())
                 .build();
         return toResponse(bidRepository.save(bid));
@@ -58,8 +63,13 @@ public class BidService {
         Bid bid = getOrThrow(id);
         var status = bidStatusRepository.findById(request.getStatusId())
                 .orElseThrow(() -> new ResourceNotFoundException("Bid status not found: " + request.getStatusId()));
+
+        Integer minHours = normalizeMinHours(request.getPricingType(), request.getMinHours());
+
         bid.setStatus(status);
-        bid.setAmount(request.getAmount());
+        bid.setPricingType(request.getPricingType());
+        bid.setPrice(request.getPrice());
+        bid.setMinHours(minHours);
         bid.setDetails(request.getDetails());
         return toResponse(bidRepository.save(bid));
     }
@@ -73,6 +83,20 @@ public class BidService {
                 .orElseThrow(() -> new ResourceNotFoundException("Bid not found: " + id));
     }
 
+    // Mirrors the DB's check_hourly_minimum constraint at the application
+    // layer so clients get a clean 400 instead of a raw constraint-violation
+    // error, and so FIXED bids always get minHours normalized to 0.
+    private Integer normalizeMinHours(PricingType pricingType, Integer minHours) {
+        if (pricingType == PricingType.FIXED) {
+            if (minHours != null && minHours != 0) {
+                throw new BadRequestException("minHours must be 0 (or omitted) when pricingType is FIXED");
+            }
+            return 0;
+        }
+        // HOURLY
+        return minHours != null ? minHours : 0;
+    }
+
     private BidResponse toResponse(Bid bid) {
         return BidResponse.builder()
                 .id(bid.getId())
@@ -80,7 +104,9 @@ public class BidService {
                 .moverName(bid.getMover().getName())
                 .rfqId(bid.getRfq().getId())
                 .status(bid.getStatus().getName())
-                .amount(bid.getAmount())
+                .pricingType(bid.getPricingType())
+                .price(bid.getPrice())
+                .minHours(bid.getMinHours())
                 .details(bid.getDetails())
                 .createdAt(bid.getCreatedAt())
                 .build();

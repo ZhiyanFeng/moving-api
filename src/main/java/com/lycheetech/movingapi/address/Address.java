@@ -3,6 +3,8 @@ package com.lycheetech.movingapi.address;
 import com.lycheetech.movingapi.user.User;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -15,6 +17,10 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+// Soft delete: historical moves reference addresses via pickup/dropoff FKs,
+// so the row must survive even after a user "removes" it from their address book.
+@SQLDelete(sql = "UPDATE addresses SET deleted_at = now() WHERE id = ?")
+@SQLRestriction("deleted_at IS NULL")
 public class Address {
 
     @Id
@@ -68,6 +74,9 @@ public class Address {
 
     @Column(name = "updated_at", nullable = false)
     private LocalDateTime updatedAt;
+
+    @Column(name = "deleted_at")
+    private LocalDateTime deletedAt;
 
     @PrePersist
     protected void onCreate() {

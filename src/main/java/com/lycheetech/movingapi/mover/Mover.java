@@ -5,7 +5,10 @@ import com.lycheetech.movingapi.lookup.geo.SubArea;
 import com.lycheetech.movingapi.lookup.movingservice.MovingService;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
 
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
@@ -17,6 +20,9 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
+// Soft delete: a mover with bid/move history must not be hard-deleted.
+@SQLDelete(sql = "UPDATE movers SET deleted_at = now() WHERE id = ?")
+@SQLRestriction("deleted_at IS NULL")
 public class Mover extends BaseEntity {
 
     @Id
@@ -29,7 +35,7 @@ public class Mover extends BaseEntity {
     @Column(name = "company_name")
     private String companyName;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false)
     private String email;
 
     @Column(name = "phone_number")
@@ -61,5 +67,8 @@ public class Mover extends BaseEntity {
     )
     @Builder.Default
     private Set<MovingService> services = new HashSet<>();
+
+    @Column(name = "deleted_at")
+    private LocalDateTime deletedAt;
 }
 

@@ -28,6 +28,9 @@ CREATE TABLE countries (
     id         BIGSERIAL    PRIMARY KEY,
     code       VARCHAR(2)   NOT NULL UNIQUE, -- ISO 3166-1 alpha-2, e.g. 'US', 'CA'
     name       VARCHAR(100) NOT NULL UNIQUE,
+    -- Deprecation flag: retire a region from active use without breaking
+    -- historical FK references (e.g. addresses/mover_service_areas).
+    is_active  BOOLEAN      NOT NULL DEFAULT TRUE,
     created_at TIMESTAMPTZ  NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMPTZ  NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
@@ -36,6 +39,7 @@ CREATE TABLE subdivisions (
     country_id  BIGINT       NOT NULL REFERENCES countries(id) ON DELETE CASCADE,
     code        VARCHAR(10)  NOT NULL, -- e.g. 'ON', 'NY', 'WA'
     name        VARCHAR(100) NOT NULL, -- e.g. 'Ontario', 'New York', 'Washington'
+    is_active   BOOLEAN      NOT NULL DEFAULT TRUE,
     created_at  TIMESTAMPTZ  NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at  TIMESTAMPTZ  NOT NULL DEFAULT CURRENT_TIMESTAMP,
     UNIQUE (country_id, code)
@@ -45,6 +49,7 @@ CREATE TABLE metro_areas (
     subdivision_id  BIGINT       NOT NULL REFERENCES subdivisions(id) ON DELETE CASCADE,
     name            VARCHAR(150) NOT NULL, -- e.g. 'Greater Toronto Area'
     description     TEXT,
+    is_active       BOOLEAN      NOT NULL DEFAULT TRUE,
     created_at      TIMESTAMPTZ  NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at      TIMESTAMPTZ  NOT NULL DEFAULT CURRENT_TIMESTAMP,
     UNIQUE (subdivision_id, name)
@@ -54,6 +59,7 @@ CREATE TABLE sub_areas (
     metro_area_id  BIGINT       NOT NULL REFERENCES metro_areas(id) ON DELETE CASCADE,
     name           VARCHAR(150) NOT NULL, -- e.g. 'Downtown Toronto', 'North York'
     description    TEXT,
+    is_active      BOOLEAN      NOT NULL DEFAULT TRUE,
     created_at     TIMESTAMPTZ  NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at     TIMESTAMPTZ  NOT NULL DEFAULT CURRENT_TIMESTAMP,
     UNIQUE (metro_area_id, name)
@@ -68,16 +74,20 @@ CREATE TABLE moving_services (
     updated_at  TIMESTAMPTZ  NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 
--- Represents the fixed categories of homes (e.g. '3-bedroom-house')
+-- Represents the fixed categories of homes (e.g. '3-bedroom-house'), used to
+-- estimate truck size / cubic feet for a move.
 CREATE TABLE property_types (
-    id                    BIGSERIAL     PRIMARY KEY,
-    slug                  VARCHAR(50)   NOT NULL UNIQUE,  -- e.g. '3-bedroom-house'
-    display_name          VARCHAR(100)  NOT NULL,         -- e.g. '3-Bedroom House'
-    -- "group" is a reserved SQL keyword, so the column is quoted here and
-    -- must also be quoted (or aliased) in any handwritten SQL that references it.
-    "group"               VARCHAR(20),                     -- e.g. 'Apartment', 'House', 'Commercial', 'Storage'
-    estimated_cubic_feet  INT           NOT NULL CHECK (estimated_cubic_feet >= 0), -- e.g. 1200
-    created_at            TIMESTAMPTZ   NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    id                   BIGSERIAL     PRIMARY KEY,
+    slug                 VARCHAR(50)   NOT NULL UNIQUE,    -- e.g. '2-bed-house', '2-bed-basement'
+    display_name         VARCHAR(100)  NOT NULL,           -- e.g. '2 Bedroom'
+    category             VARCHAR(50)   NOT NULL,           -- e.g. 'House', 'Townhouse', 'Apartment', 'Storage'
+    section_name         VARCHAR(50)   NOT NULL,           -- e.g. 'Full House', 'Basement Suite', 'Apartment'
+    room_count           INT           NOT NULL DEFAULT 0 CHECK (room_count >= 0),
+    is_basement          BOOLEAN       NOT NULL DEFAULT false,
+    estimated_cubic_feet INT           NOT NULL CHECK (estimated_cubic_feet >= 0),
+    display_order        INT           NOT NULL DEFAULT 0,
+    is_active            BOOLEAN       NOT NULL DEFAULT true,
+    created_at           TIMESTAMPTZ   NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at            TIMESTAMPTZ   NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 -- =============================================================
@@ -86,8 +96,8 @@ CREATE TABLE property_types (
 CREATE TABLE users (
     -- 1. Identity & Auth Mapping
     id                UUID         PRIMARY KEY DEFAULT uuid_generate_v4(),
-    firebase_uid      VARCHAR(128) NOT NULL UNIQUE,
-    email             VARCHAR(255) NOT NULL UNIQUE,
+    firebase_uid      VARCHAR(128) NOT NULL,
+    email             VARCHAR(255) NOT NULL,
 
     -- 2. Profile Info
     first_name        VARCHAR(100) NOT NULL,
@@ -103,7 +113,13 @@ CREATE TABLE users (
 
     -- 4. Audit Metadata
     created_at        TIMESTAMPTZ  NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at        TIMESTAMPTZ  NOT NULL DEFAULT CURRENT_TIMESTAMP
+    updated_at        TIMESTAMPTZ  NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    -- 5. Soft Delete: account deletion must preserve historical moves/payments
+    -- referencing this user, so we mark rather than hard-delete. Uniqueness on
+    -- email/firebase_uid is enforced only among non-deleted rows (see partial
+    -- unique indexes below), allowing the same email to be reused later.
+    deleted_at        TIMESTAMPTZ
 );
 
 -- Index for searching users
@@ -133,6 +149,10 @@ CREATE TABLE addresses (
     has_elevator           BOOLEAN       NOT NULL DEFAULT FALSE,
     parking_restrictions   TEXT,
 
+    -- Soft delete: keep the row intact so historical moves that reference
+    -- this address via pickup_address_id/dropoff_address_id remain valid.
+    deleted_at             TIMESTAMPTZ,
+
     created_at             TIMESTAMPTZ   NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at             TIMESTAMPTZ   NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
@@ -141,7 +161,7 @@ CREATE TABLE movers (
     id           UUID         PRIMARY KEY DEFAULT uuid_generate_v4(),
     name         VARCHAR(255) NOT NULL,
     company_name VARCHAR(255),
-    email        VARCHAR(255) NOT NULL UNIQUE,
+    email        VARCHAR(255) NOT NULL,
     phone_number VARCHAR(50),
     address      TEXT,
     description  TEXT,
@@ -150,7 +170,11 @@ CREATE TABLE movers (
     created_at   TIMESTAMPTZ  NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at   TIMESTAMPTZ  NOT NULL DEFAULT CURRENT_TIMESTAMP,
     created_by   VARCHAR(255),
-    updated_by   VARCHAR(255)
+    updated_by   VARCHAR(255),
+    -- Soft delete: a mover with bid/move history must not be hard-deleted
+    -- (would cascade into bids/moves/payments). Email uniqueness is enforced
+    -- only among non-deleted rows (see partial unique index below).
+    deleted_at   TIMESTAMPTZ
 );
 CREATE TABLE mover_service_areas (
     mover_id    UUID   NOT NULL REFERENCES movers(id)     ON DELETE CASCADE,
@@ -178,30 +202,57 @@ CREATE TABLE rfqs (
     -- as free-form JSON since there is no inventory catalog table backing this.
     specialty_items     JSONB NOT NULL DEFAULT '[]'::jsonb,
 
+    -- Driving distance between origin/destination, fetched once from the
+    -- Google Distance Matrix API at create/update time so movers can see
+    -- trip length upfront when bidding. Nullable: left blank if either
+    -- address is missing coordinates or the external API call fails.
+    estimated_distance_km NUMERIC(10,2),
+
+    -- Soft delete: lets a customer remove a stale/unwanted RFQ without
+    -- destroying bid history tied to it (see BidStatus.WITHDRAWN for the
+    -- mover-side equivalent of withdrawing a bid).
+    deleted_at          TIMESTAMPTZ,
+
     created_at          TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at          TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
     created_by          VARCHAR(255),
     updated_by          VARCHAR(255)
 );
+CREATE TYPE bid_pricing_type AS ENUM ('FIXED', 'HOURLY');
+
 CREATE TABLE bids (
-    id         UUID          PRIMARY KEY DEFAULT uuid_generate_v4(),
-    mover_id   UUID          NOT NULL REFERENCES movers(id)             ON DELETE CASCADE,
-    rfq_id     UUID          NOT NULL REFERENCES rfqs(id)               ON DELETE CASCADE,
-    status_id  BIGINT        NOT NULL REFERENCES bid_statuses(id),
-    amount     DECIMAL(10,2) NOT NULL CHECK (amount > 0),
-    details    TEXT,
-    created_at TIMESTAMPTZ   NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMPTZ   NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    created_by VARCHAR(255),
-    updated_by VARCHAR(255),
-    UNIQUE (mover_id, rfq_id)
+    id             UUID             PRIMARY KEY DEFAULT gen_random_uuid(), -- PostgreSQL native UUID generator
+    mover_id       UUID             NOT NULL REFERENCES movers(id) ON DELETE CASCADE,
+    rfq_id         UUID             NOT NULL REFERENCES rfqs(id) ON DELETE CASCADE,
+    status_id      BIGINT           NOT NULL REFERENCES bid_statuses(id),
+
+    pricing_type   bid_pricing_type NOT NULL,
+    price          DECIMAL(10,2)    NOT NULL CHECK (price > 0),
+    min_hours      INT              DEFAULT 0 CHECK (min_hours >= 0),
+
+    details        TEXT,
+    created_at     TIMESTAMPTZ      NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at     TIMESTAMPTZ      NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_by     VARCHAR(255),
+    updated_by     VARCHAR(255),
+
+    UNIQUE (mover_id, rfq_id),
+
+    -- This constraint works natively out-of-the-box in PostgreSQL
+    CONSTRAINT check_hourly_minimum CHECK (
+        (pricing_type = 'FIXED' AND min_hours = 0) OR
+        (pricing_type = 'HOURLY')
+    )
 );
 CREATE TABLE moves (
     id              UUID  PRIMARY KEY DEFAULT uuid_generate_v4(),
-    rfq_id          UUID  NOT NULL REFERENCES rfqs(id)                  ON DELETE CASCADE,
+    -- RESTRICT (not CASCADE): moves are financial/audit records and must
+    -- never disappear as a side effect of deleting their originating RFQ or
+    -- bid. Combined with soft-delete on rfqs, the underlying row survives.
+    rfq_id          UUID  NOT NULL REFERENCES rfqs(id)                  ON DELETE RESTRICT,
     mover_id        UUID  NOT NULL REFERENCES movers(id)                ON DELETE CASCADE,
     customer_id     UUID  NOT NULL REFERENCES users(id)                 ON DELETE RESTRICT,
-    bid_id          UUID  NOT NULL REFERENCES bids(id)                  ON DELETE CASCADE,
+    bid_id          UUID  NOT NULL REFERENCES bids(id)                  ON DELETE RESTRICT,
     status_id       BIGINT NOT NULL REFERENCES booking_statuses(id),
 
     -- Operational Links (Points to the addresses table)
@@ -247,6 +298,15 @@ CREATE TABLE payments (
 -- =============================================================
 -- Indexes
 -- =============================================================
+-- Partial unique indexes: enforce uniqueness only among non-deleted rows,
+-- so a soft-deleted user's/mover's email or firebase_uid can be reused.
+CREATE UNIQUE INDEX idx_users_email_active        ON users(email)        WHERE deleted_at IS NULL;
+CREATE UNIQUE INDEX idx_users_firebase_uid_active ON users(firebase_uid) WHERE deleted_at IS NULL;
+CREATE UNIQUE INDEX idx_movers_email_active       ON movers(email)      WHERE deleted_at IS NULL;
+-- Speed up filtering out soft-deleted rows on frequently-queried tables
+CREATE INDEX idx_movers_deleted_at ON movers(deleted_at);
+CREATE INDEX idx_rfqs_deleted_at   ON rfqs(deleted_at);
+
 CREATE INDEX idx_mover_service_areas_mover_id    ON mover_service_areas(mover_id);
 CREATE INDEX idx_mover_service_areas_sub_area_id ON mover_service_areas(sub_area_id);
 CREATE INDEX idx_mover_services_mover_id   ON mover_services(mover_id);

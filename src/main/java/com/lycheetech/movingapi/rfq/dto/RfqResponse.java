@@ -3,6 +3,7 @@ package com.lycheetech.movingapi.rfq.dto;
 import lombok.Builder;
 import lombok.Data;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -22,6 +23,9 @@ public class RfqResponse {
     private LocalDate moveDate;
     private String notes;
     private List<SpecialtyItem> specialtyItems;
+    // Estimated driving distance (km) between origin and destination, via
+    // Google Distance Matrix API; null if unavailable.
+    private BigDecimal estimatedDistanceKm;
     private LocalDateTime createdAt;
 }
 

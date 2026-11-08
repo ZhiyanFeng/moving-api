@@ -31,6 +31,11 @@ public class RfqController {
         return ResponseEntity.ok(ApiResponse.success(rfqService.findByUser(userId)));
     }
 
+    @GetMapping("/user/{userId}/open")
+    public ResponseEntity<ApiResponse<List<RfqResponse>>> getOpenByUser(@PathVariable UUID userId) {
+        return ResponseEntity.ok(ApiResponse.success(rfqService.findOpenByUser(userId)));
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<RfqResponse>> getById(@PathVariable UUID id) {
         return ResponseEntity.ok(ApiResponse.success(rfqService.findById(id)));

@@ -1,5 +1,6 @@
 package com.lycheetech.movingapi.bid.dto;
 
+import com.lycheetech.movingapi.bid.PricingType;
 import lombok.Builder;
 import lombok.Data;
 
@@ -15,7 +16,9 @@ public class BidResponse {
     private String moverName;
     private UUID rfqId;
     private String status;
-    private BigDecimal amount;
+    private PricingType pricingType;
+    private BigDecimal price;
+    private Integer minHours;
     private String details;
     private LocalDateTime createdAt;
 }
